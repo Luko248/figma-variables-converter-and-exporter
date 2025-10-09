@@ -4,100 +4,122 @@
 
 /**
  * Detects the type of a variable based on its name patterns
- * 
+ *
  * @param name - The variable name to analyze
  * @returns The detected variable type category
  */
 export const detectVariableType = (name: string): string => {
   const lowerName = name.toLowerCase();
-  
+
   const typeDetectors = [
-    { type: 'spacing', check: isSpacingVariable },
-    { type: 'sizing', check: isSizingVariable },
-    { type: 'border-radius', check: isRadiusVariable },
-    { type: 'opacity', check: isOpacityVariable },
-    { type: 'elevation', check: isElevationVariable },
-    { type: 'font-family', check: isFontFamilyVariable },
-    { type: 'font-weight', check: isFontWeightVariable },
-    { type: 'animation', check: isAnimationVariable },
+    { type: "measures", check: isMeasuresVariable },
+    { type: "fonts", check: isFontsVariable },
+    { type: "shadows", check: isShadowsVariable },
+    { type: "gradient", check: isGradientVariable },
   ];
-  
-  const detectedType = typeDetectors.find(detector => detector.check(lowerName));
-  return detectedType?.type || 'other';
+
+  const detectedType = typeDetectors.find((detector) =>
+    detector.check(lowerName)
+  );
+  return detectedType?.type || "color";
 };
 
-// Lambda functions for type detection
-const isSpacingVariable = (name: string): boolean =>
-  ['spacing', 'space', 'gap', 'margin', 'padding', 'pad'].some(term => name.includes(term)) ||
-  /\b(xs|sm|md|lg|xl|xxl)\b/.test(name);
+// Lambda functions for Supernova category detection
+const isMeasuresVariable = (name: string): boolean =>
+  [
+    "spacing",
+    "space",
+    "gap",
+    "margin",
+    "padding",
+    "pad",
+    "size",
+    "width",
+    "height",
+    "dimension",
+    "radius",
+    "rounded",
+    "corner",
+    "opacity",
+    "alpha",
+    "transparency",
+    "duration",
+    "timing",
+    "animation",
+    "transition",
+    "border",
+    "fontSize",
+    "lineHeight",
+  ].some((term) => name.includes(term)) ||
+  /\b(xs|sm|md|lg|xl|xxl|\d+)\b/.test(name);
 
-const isSizingVariable = (name: string): boolean =>
-  ['size', 'width', 'height', 'dimension'].some(term => name.includes(term));
+const isFontsVariable = (name: string): boolean =>
+  [
+    "font",
+    "weight",
+    "family",
+    "typeface",
+    "bold",
+    "light",
+    "medium",
+    "regular",
+    "textCase",
+    "textDecoration",
+    "underline",
+  ].some((term) => name.includes(term));
 
-const isRadiusVariable = (name: string): boolean =>
-  ['radius', 'rounded', 'corner'].some(term => name.includes(term));
+const isShadowsVariable = (name: string): boolean =>
+  ["shadow", "elevation", "depth", "boxShadow", "innerShadow"].some((term) =>
+    name.includes(term)
+  );
 
-const isOpacityVariable = (name: string): boolean =>
-  ['opacity', 'alpha', 'transparency'].some(term => name.includes(term));
-
-const isElevationVariable = (name: string): boolean =>
-  ['elevation', 'shadow', 'depth', 'z-index'].some(term => name.includes(term));
-
-const isFontFamilyVariable = (name: string): boolean =>
-  name.includes('font') && ['family', 'typeface'].some(term => name.includes(term));
-
-const isFontWeightVariable = (name: string): boolean =>
-  ['weight', 'bold', 'light', 'medium'].some(term => name.includes(term));
-
-const isAnimationVariable = (name: string): boolean =>
-  ['duration', 'timing', 'animation', 'transition'].some(term => name.includes(term));
+const isGradientVariable = (name: string): boolean =>
+  ["gradient", "linear", "radial"].some((term) => name.includes(term));
 
 /**
  * Generates a CSS custom property name from a Figma variable
  * Format: --{type}_{clean-name} (e.g., --color_btn-bg, --space_btn-pad-inline)
- * 
+ *
  * @param _collectionName - Collection name (unused in current implementation)
  * @param variableName - The Figma variable name
  * @returns Formatted CSS custom property name
  */
-export const generateCSSVariableName = (_collectionName: string, variableName: string): string => {
+export const generateCSSVariableName = (
+  _collectionName: string,
+  variableName: string
+): string => {
   const variableType = detectVariableType(variableName);
-  const typePrefix = getTypePrefix(variableType);
   const cleanVariable = cleanVariableName(variableName);
-  
-  return `--${typePrefix}_${cleanVariable}`;
+
+  return `--${variableType}${cleanVariable}`;
 };
 
 /**
- * Cleans and formats variable name with camelCase to kebab-case conversion
- * 
+ * Cleans and formats variable name with proper camelCase convention
+ * Examples:
+ * - "btn/large/paddingBlock" → "BtnLargePaddingBlock"
+ * - "spacing-btn-large" → "SpacingBtnLarge"
+ * - "Button/Primary/Background" → "ButtonPrimaryBackground"
+ *
  * @param name - Raw variable name
- * @returns Cleaned variable name
+ * @returns Cleaned variable name in PascalCase
  */
-const cleanVariableName = (name: string): string => name
-  .replace(/([a-z])([A-Z])/g, '$1-$2') // Convert camelCase to kebab-case
-  .toLowerCase()
-  .replace(/[^a-z0-9-]/g, '') // Keep only letters, numbers, and hyphens
-  .replace(/-+/g, '-') // Remove duplicate hyphens
-  .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+const cleanVariableName = (name: string): string => {
+  // Split by common separators: /, -, _, space
+  const parts = name.split(/[/\-_\s]+/).filter((part) => part.length > 0);
 
-/**
- * Maps variable types to CSS prefix names
- * 
- * @param variableType - The detected variable type
- * @returns Short prefix for CSS custom property names
- */
-const getTypePrefix = (variableType: string): string => {
-  const typePrefixMap: Record<string, string> = {
-    spacing: 'space',
-    sizing: 'size',
-    'border-radius': 'radius',
-    opacity: 'opacity',
-    elevation: 'elevation',
-    'font-family': 'font',
-    'font-weight': 'weight',
-    animation: 'anim',
-  };
-  
-  return typePrefixMap[variableType] || 'color';
+  // Capitalize first letter of each part while preserving existing camelCase
+  const camelCased = parts
+    .map((part) => {
+      // Remove leading numbers from each part
+      const cleaned = part.replace(/^\d+/, "");
+      if (cleaned.length === 0) return "";
+
+      // Capitalize first letter, keep rest as-is (preserving existing camelCase)
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    })
+    .filter((part) => part.length > 0)
+    .join("");
+
+  return camelCased;
 };

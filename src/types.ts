@@ -30,6 +30,13 @@ declare global {
     id: string;
     name: string;
     variableIds: string[];
+    modes: { modeId: string; name: string }[];
+  }
+
+  /** Variable alias reference */
+  interface VariableAlias {
+    type: 'VARIABLE_ALIAS';
+    id: string;
   }
 
   /** Individual Figma design variable with type and values */
@@ -37,7 +44,7 @@ declare global {
     id: string;
     name: string;
     resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
-    valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean };
+    valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias };
     setVariableCodeSyntax(platform: string, syntax: string): void;
   }
 
@@ -65,8 +72,8 @@ declare global {
       };
     };
     ui: {
-      postMessage(message: any): void;
-      onmessage: ((message: any) => void) | null;
+      postMessage(message: unknown): void;
+      onmessage: ((message: unknown) => void) | null;
     };
     notify(message: string, options?: { error?: boolean }): void;
     closePlugin(): void;

@@ -44,5 +44,8 @@
         }
       ]
     }
+  },
+  "dependencies": {
+    "colorizr": "^3.0.8"
   }
 }
