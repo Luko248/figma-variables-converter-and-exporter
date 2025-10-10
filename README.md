@@ -22,7 +22,7 @@ Automatically generates and exports multiple categorized SCSS files to your GitH
 
 ## Features
 
-- 🎨 **Modern Color Format:** OKLCH colors (`oklch(0.7 0.15 180)`) with alpha (`oklch(0.7 0.15 180 / 0.5)`) powered by [Colorizr](https://www.npmjs.com/package/colorizr)
+- 🎨 **Modern Color Format:** HSL colors (`hsl(200 75% 60%)`) with alpha (`hsl(200 75% 60% / .5)`) via a lightweight custom converter
 - 📏 **Rem Units:** All sizes converted to rem units (16px base: `1rem`, `0.5rem`, etc.)
 - 🏷️ **Semantic Naming:** Variable names with category prefixes (`--colorPrimary500`, `--measuresSpacing16`)
 - 🔄 **Auto Type Detection:** Detects colors, measures, fonts, shadows, gradients
@@ -83,15 +83,15 @@ darktheme/
 @mixin create-color {
 
 /* --- primary --- */
-  --colorPrimary100: oklch(0.961 0.013 180.3);
-  --colorPrimary200: oklch(0.921 0.017 184.2);
-  --colorPrimary500: oklch(0.702 0.131 173.8);
-  --colorPrimary900: oklch(0.422 0.089 181.4);
+  --colorPrimary100: hsl(200 100% 96%);
+  --colorPrimary200: hsl(200 92% 85%);
+  --colorPrimary500: hsl(200 75% 60%);
+  --colorPrimary900: hsl(200 85% 25%);
 
 /* --- secondary --- */
-  --colorSecondary100: oklch(0.982 0.003 210.1);
-  --colorSecondary500: oklch(0.712 0.012 210.5);
-  --colorSecondary900: oklch(0.151 0.008 210.2);
+  --colorSecondary100: hsl(160 100% 95%);
+  --colorSecondary500: hsl(160 70% 55%);
+  --colorSecondary900: hsl(160 85% 20%);
 }
 ```
 
@@ -140,14 +140,14 @@ The plugin automatically detects Figma variable modes (themes) and organizes tok
 ```scss
 // lighttheme/_color.scss
 @mixin create-color {
-  --colorPrimary500: oklch(0.702 0.131 173.8);
-  --colorBackground: oklch(0.99 0.005 180);
+  --colorPrimary500: hsl(200 75% 60%);
+  --colorBackground: hsl(0 0% 100%);
 }
 
 // darktheme/_color.scss  
 @mixin create-color {
-  --colorPrimary500: oklch(0.702 0.131 173.8);
-  --colorBackground: oklch(0.15 0.008 180);
+  --colorPrimary500: hsl(200 75% 60%);
+  --colorBackground: hsl(0 0% 12%);
 }
 ```
 
@@ -157,7 +157,7 @@ The plugin uses a modular architecture with lambda functions and clean separatio
 
 ### `utils.ts`
 
-- **OKLCH Color Conversion:** `rgbToOklch()`, `rgbaToOklch()` with alpha support
+- **HSL Color Conversion:** `rgbToHsl()`, `rgbaToHsl()` with alpha support
 - **Unit Conversion:** `pxToRem()` for consistent rem units
 - **GitHub Integration:** `base64Encode()` for API compatibility
 
@@ -171,7 +171,7 @@ The plugin uses a modular architecture with lambda functions and clean separatio
 
 - **Value Conversion:** Type-specific CSS value generation
 - **Output Formatting:** Organized CSS with proper grouping and comments
-- **Modern Syntax:** OKLCH colors, rem units, alpha support
+- **Modern Syntax:** HSL colors, rem units, alpha support
 
 ### `github-service.ts`
 
@@ -275,7 +275,7 @@ src/
 
 | Figma Variable    | CSS Variable Name              | CSS Value Example   | File Location |
 | ----------------- | ------------------------------ | ------------------- | ------------- |
-| `primaryColor`    | `--colorPrimaryColor`         | `oklch(0.7 0.15 220)` | `_color.scss` |
+| `primaryColor`    | `--colorPrimaryColor`         | `hsl(200 75% 60%)` | `_color.scss` |
 | `spacing16`       | `--measuresSpacing16`          | `1rem`              | `_measures.scss` |
 | `borderRadius`    | `--measuresBorderRadius`       | `0.25rem`           | `_measures.scss` |
 | `fontWeightBold`  | `--fontsFontWeightBold`        | `700`               | `_fonts.scss` |
@@ -315,7 +315,7 @@ npm run watch
 - **Lambda Functions:** Clean, functional programming approach
 - **Type Safety:** Comprehensive TypeScript interfaces
 - **Single Bundle:** 19KB optimized output for Figma
-- **Modern CSS:** OKLCH colors, rem units, semantic naming
+- **Modern CSS:** HSL colors, rem units, semantic naming
 - **Error Handling:** Robust error management and user feedback
 - **Security:** Secure token handling and Git integration
 

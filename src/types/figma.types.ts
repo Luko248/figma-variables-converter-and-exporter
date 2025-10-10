@@ -1,7 +1,7 @@
 /**
- * Type definitions for Figma Plugin API and custom interfaces
- * Extends global environment with Figma-specific types and APIs
+ * Figma Plugin API type definitions
  */
+
 declare global {
   /** Console API available in Figma plugin environment */
   const console: {
@@ -25,29 +25,6 @@ declare global {
     json(): Promise<unknown>;
   }>;
 
-  /** Figma variable collection containing multiple design variables */
-  interface VariableCollection {
-    id: string;
-    name: string;
-    variableIds: string[];
-    modes: { modeId: string; name: string }[];
-  }
-
-  /** Variable alias reference */
-  interface VariableAlias {
-    type: 'VARIABLE_ALIAS';
-    id: string;
-  }
-
-  /** Individual Figma design variable with type and values */
-  interface Variable {
-    id: string;
-    name: string;
-    resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
-    valuesByMode: { [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias };
-    setVariableCodeSyntax(platform: string, syntax: string): void;
-  }
-
   /** RGB color representation */
   interface RGB {
     r: number;
@@ -58,6 +35,31 @@ declare global {
   /** RGBA color with alpha channel */
   interface RGBA extends RGB {
     a: number;
+  }
+
+  /** Variable alias reference */
+  interface VariableAlias {
+    type: 'VARIABLE_ALIAS';
+    id: string;
+  }
+
+  /** Figma variable collection containing multiple design variables */
+  interface VariableCollection {
+    id: string;
+    name: string;
+    variableIds: string[];
+    modes: { modeId: string; name: string }[];
+  }
+
+  /** Individual Figma design variable with type and values */
+  interface Variable {
+    id: string;
+    name: string;
+    resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
+    valuesByMode: { 
+      [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias 
+    };
+    setVariableCodeSyntax(platform: string, syntax: string): void;
   }
 
   /** Main Figma plugin API object */
