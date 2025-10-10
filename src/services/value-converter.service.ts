@@ -116,6 +116,7 @@ export const safeFloatConversion = (
 
 /**
  * Safe string conversion with sanitization
+ * Does NOT add quotes - shadows and gradients are raw CSS values
  */
 export const safeStringConversion = (
   stringValue: string,
@@ -133,7 +134,7 @@ export const safeStringConversion = (
 
     if (sanitized.length === 0) {
       console.warn(`⚠️ Empty string value for ${variableName}`);
-      return '""';
+      return "";
     }
 
     if (hasPotentiallyUnsafeChars(sanitized)) {
@@ -142,10 +143,11 @@ export const safeStringConversion = (
       );
     }
 
+    // Return raw value without quotes - shadows/gradients are CSS values
     return sanitized;
   } catch (error) {
     console.error(`❌ Error converting string for ${variableName}:`, error);
-    return '""';
+    return "";
   }
 };
 
@@ -188,7 +190,8 @@ export async function resolveAliasToRawValue(
       }
       case 'STRING': {
         const stringValue = rawValue as string;
-        return stringValue ? `"${stringValue}"` : '""';
+        // Return raw string value without quotes (for shadows/gradients)
+        return safeStringConversion(stringValue, aliasedVariable.name);
       }
       default:
         return String(rawValue);

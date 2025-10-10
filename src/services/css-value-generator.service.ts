@@ -160,9 +160,10 @@ const convertStringValue = async (
     console.warn(
       `⚠️ No string value found for mode ${targetModeId} in ${variable.name}`
     );
-    return '""';
+    return "";
   }
 
+  // Return raw string value without quotes (for shadows/gradients)
   return safeStringConversion(stringValue, variable.name);
 };
 

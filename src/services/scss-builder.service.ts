@@ -178,7 +178,14 @@ export function buildThemeAwareOutput(
 
   themes.forEach((theme) => {
     // Convert theme name to kebab-case (lowercase with dashes)
-    const themeName = themes.length === 1 ? "theme" : toKebabCase(theme);
+    let themeName = themes.length === 1 ? "theme" : toKebabCase(theme);
+    
+    // Remove "light" suffix - only use suffix for dark themes
+    // e.g., "Koop Light" → "koop", "Koop Dark" → "koop-dark"
+    if (themeName.endsWith("-light")) {
+      themeName = themeName.replace(/-light$/, "");
+    }
+    
     console.log(`   Processing theme: ${theme} → ${themeName}`);
     console.log(`   Variables count: ${variablesByTheme[theme]?.length || 0}`);
 

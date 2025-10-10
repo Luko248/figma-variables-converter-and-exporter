@@ -48,8 +48,8 @@ const buildHslString = (
   const s = toPercent(saturation);
   const l = toPercent(lightness);
   return alpha === undefined
-    ? `hsl(${h} ${s}% ${l}%)`
-    : `hsl(${h} ${s}% ${l}% / ${alpha})`;
+    ? `hsl(${h}, ${s}%, ${l}%)`
+    : `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
 };
 
 /** Normalizes RGB values */
@@ -107,12 +107,13 @@ export const rgbaToHsl = (r: number, g: number, b: number, a: number): string =>
 };
 
 /**
- * Formats decimal alpha values properly (.1, .2, etc.)
+ * Formats decimal alpha values with proper precision (0.1, 0.2, etc.)
  */
 export const formatAlpha = (alpha: number): string => {
   if (alpha === 1) return "1";
   if (alpha === 0) return "0";
-  return `.${Math.round(alpha * 10)}`;
+  // Round to 1 decimal place and format with leading zero
+  return (Math.round(alpha * 10) / 10).toString();
 };
 
 /**
