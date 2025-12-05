@@ -7,6 +7,7 @@ import "./types/figma.types";
 import { ConversionResult } from "./types/index";
 import { convertVariablesToCSS } from "./services/variable-conversion.service";
 import { exportToGitHub } from "./services/export.service";
+import { GITHUB_CONFIG } from "./config";
 
 // Global flag to prevent multiple executions
 let isRunning = false;
@@ -141,6 +142,12 @@ function main() {
       variableId?: string;
       value?: unknown;
       variableType?: string;
+      githubConfig?: {
+        owner?: string;
+        repo?: string;
+        path?: string;
+        token?: string;
+      };
     };
 
     const { type, collectionId, name, variableId, value, variableType } =
@@ -288,6 +295,21 @@ function main() {
               },
             });
           }
+          break;
+        }
+
+        case "update-config": {
+          const cfg = message.githubConfig;
+          if (cfg) {
+            if (cfg.owner !== undefined) GITHUB_CONFIG.owner = cfg.owner;
+            if (cfg.repo !== undefined) GITHUB_CONFIG.repo = cfg.repo;
+            if (cfg.path !== undefined) GITHUB_CONFIG.path = cfg.path;
+            if (cfg.token !== undefined) GITHUB_CONFIG.token = cfg.token;
+          }
+
+          figma.ui.postMessage({
+            type: "config-updated",
+          });
           break;
         }
 

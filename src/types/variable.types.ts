@@ -6,7 +6,7 @@
 export interface CSSVariable {
   name: string;
   value: string;
-  type: string;
+  type: VariableCategory;
 }
 
 /** CSS variable with additional internal metadata */
@@ -27,26 +27,10 @@ export interface ConversionResult {
   variablesByTheme?: Record<string, CSSVariable[]>;
 }
 
-/** SCSS file output structure */
-export interface ScssFileOutput {
-  colors: string;
-  measures: string;
-  fonts: string;
-  shadows: string;
-  gradients: string;
-  index: string;
-  root: string;
-}
-
-/** Theme-aware SCSS output */
-export interface ThemeScssOutput {
-  [themeName: string]: ScssFileOutput;
+/** Theme-aware CSS output (theme name -> CSS content) */
+export interface ThemeCssOutput {
+  [themeName: string]: string;
 }
 
 /** Variable type categories */
-export type VariableCategory = 
-  | "color" 
-  | "measures" 
-  | "fonts" 
-  | "shadow" 
-  | "gradient";
+export type VariableCategory = "color" | "measures" | "fonts";

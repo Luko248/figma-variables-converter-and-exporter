@@ -22,7 +22,7 @@ src/
 │   ├── variable-naming.service.ts         # CSS variable naming
 │   ├── value-converter.service.ts         # Safe value conversion
 │   ├── css-value-generator.service.ts     # CSS value generation
-│   ├── scss-builder.service.ts            # SCSS file building
+│   ├── css-builder.service.ts             # Raw CSS output building
 │   ├── variable-conversion.service.ts     # Conversion orchestration
 │   └── export.service.ts                  # Export orchestration
 │
@@ -33,7 +33,7 @@ src/
 │   └── index.ts           # Central export point
 │
 ├── github-service.ts      # GitHub API integration
-├── config.ts              # Configuration (injected from config.json)
+├── config.ts              # Session config (hydrated from UI at runtime)
 └── main.ts                # Plugin entry point
 ```
 
@@ -63,22 +63,25 @@ Business logic and orchestration. Services can depend on helpers and other servi
 - `variable-naming.service.ts` - Generates CSS variable names
 - `value-converter.service.ts` - Safe conversion with error handling
 - `css-value-generator.service.ts` - Generates CSS values from Figma variables
-- `scss-builder.service.ts` - Builds SCSS files with mixins
+- `css-builder.service.ts` - Builds raw CSS grouped in :root
 - `variable-conversion.service.ts` - Orchestrates entire conversion process
-- `export.service.ts` - Orchestrates GitHub export
+- `export.service.ts` - Orchestrates GitHub export (uses UI-provided config)
 
 ### 4. **Types** (`types/`)
 TypeScript type definitions organized by domain.
 
 **Files:**
 - `figma.types.ts` - Figma API global type declarations
-- `variable.types.ts` - Variable, conversion result, and SCSS output types
+- `variable.types.ts` - Variable, conversion result, and CSS output types
 - `github.types.ts` - GitHub API request/response types
 - `index.ts` - Central export point for all types
 
+### UI / Runtime Config
+- `ui.html` - Plugin UI with tabs for tokens, converter, exporter, and settings; stores GitHub settings locally and sends them to the plugin each session.
+
 ### 5. **Integration** (Root level)
 - `github-service.ts` - GitHub API integration (creates commits, pushes files)
-- `config.ts` - Configuration injected from config.json
+- `config.ts` - Session config for GitHub values received from the UI
 - `main.ts` - Plugin entry point and UI message handling
 
 ## Naming Conventions
@@ -87,15 +90,6 @@ TypeScript type definitions organized by domain.
 - **color**: `--colorPrimary`, `--colorBtnBackground`
 - **measures**: `--measuresSpacingSm`, `--measuresBorderRadius`
 - **fonts**: `--fontsWeightBold`, `--fontsFamilyBase`
-- **shadow**: `--shadowPanelBoxShadow`, `--shadowElevation1` *(singular)*
-- **gradient**: `--gradientPrimary`, `--gradientHero` *(singular)*
-
-### Mixin Names (All Plural)
-- `@mixin create-colors { }`
-- `@mixin create-measures { }`
-- `@mixin create-fonts { }`
-- `@mixin create-shadows { }`
-- `@mixin create-gradients { }`
 
 ## Key Design Decisions
 
@@ -117,9 +111,15 @@ TypeScript type definitions organized by domain.
 
 ## Build Process
 
-1. **prebuild**: Injects config from `config.json` → `src/config.ts`
+1. **prebuild**: Injects config from `config.json` or example/stub → `src/config.ts` (runtime config is still driven by the UI)
 2. **build**: Bundles all TypeScript with `@vercel/ncc` → `code.js`
-3. **post-build**: Removes Node.js incompatible code via `fix-figma-compat.js`
+3. **post-build**: Removes Node.js incompatible code via `fix-figma-compat.js` (kept for Figma runtime safety)
+
+## Export Branching Strategy
+- Base fetched from `master` (fallback to configured branch or `main`).
+- Creates a feature branch per export: `feat/figma-variables-<timestampCET>`.
+- Commit message: `feat(figma-variables): New version of Figma variables was exported <timestamp CET>`.
+- Each theme is written as `variables.css` inside a theme-named folder (kebab-case, lowercased).
 
 ## Benefits of This Architecture
 

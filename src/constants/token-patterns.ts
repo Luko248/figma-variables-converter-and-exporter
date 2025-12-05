@@ -25,43 +25,18 @@ export const MEASURES_KEYWORDS = [
   "animation",
   "transition",
   "border",
-  "fontSize",
-  "lineHeight",
 ] as const;
 
 /** Keywords that indicate a fonts variable */
 export const FONTS_KEYWORDS = [
   "font",
-  "weight",
-  "family",
-  "typeface",
-  "bold",
-  "light",
-  "medium",
-  "regular",
+  "fontfamily",
+  "fontweight",
+  "fontsize",
   "textCase",
   "textDecoration",
   "underline",
 ] as const;
-
-/** Keywords that indicate a shadows variable */
-export const SHADOWS_KEYWORDS = [
-  "shadow",
-  "elevation",
-  "depth",
-  "boxShadow",
-  "innerShadow",
-] as const;
-
-/** Keywords that indicate a gradient variable */
-export const GRADIENT_KEYWORDS = [
-  "gradient",
-  "linear",
-  "radial",
-] as const;
-
-/** Regex pattern for size-related variable names */
-export const SIZE_PATTERN = /\b(xs|sm|md|lg|xl|xxl|\d+)\b/;
 
 /** Keywords that indicate opacity values */
 export const OPACITY_KEYWORDS = ["opacity", "alpha"] as const;

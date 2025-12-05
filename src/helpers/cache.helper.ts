@@ -42,7 +42,7 @@ export const getPooledVariableObject = (): ProcessedVariable => {
   return variablePool.pop() || {
     name: '',
     value: '',
-    type: '',
+    type: 'color',
     variable: null
   };
 };
@@ -54,7 +54,7 @@ export const returnToPool = (obj: ProcessedVariable): void => {
   // Reset object properties
   obj.name = '';
   obj.value = '';
-  obj.type = '';
+  obj.type = 'color';
   obj.variable = null;
 
   // Return to pool (limit pool size to prevent memory leaks)

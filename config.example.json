@@ -3,9 +3,8 @@
     "owner": "your-github-username",
     "repo": "your-repo-name",
     "path": "src/styles/tokens",
-    "branch": "main",
     "token": "YOUR_GITHUB_TOKEN_HERE",
-    "comment": "path should be a directory where SCSS files will be created, NOT a single file"
+    "comment": "path should be a directory where CSS files will be created, NOT a single file"
   },
   "api": {
     "githubBase": "https://api.github.com"

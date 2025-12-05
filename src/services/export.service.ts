@@ -3,8 +3,23 @@
  */
 
 import { ConversionResult } from "../types/index";
-import { buildSupernovaOutput, buildThemeAwareOutput } from "./scss-builder.service";
-import { pushAllThemesToGitHub, pushScssFilesToGitHub } from "../github-service";
+import { buildCssOutput, buildThemeAwareCssOutput } from "./css-builder.service";
+import { pushCssThemesToGitHub } from "../github-service";
+import { GITHUB_CONFIG } from "../config";
+
+function assertGitHubConfig(): void {
+  const missing: string[] = [];
+  if (!GITHUB_CONFIG.owner) missing.push("owner");
+  if (!GITHUB_CONFIG.repo) missing.push("repo");
+  if (!GITHUB_CONFIG.path) missing.push("path");
+  if (!GITHUB_CONFIG.token) missing.push("token");
+
+  if (missing.length) {
+    throw new Error(
+      `GitHub configuration is incomplete. Missing: ${missing.join(", ")}`
+    );
+  }
+}
 
 /**
  * Exports CSS variables to GitHub repository
@@ -13,6 +28,8 @@ export async function exportToGitHub(
   data: ConversionResult
 ): Promise<{ success: boolean; message: string }> {
   try {
+    assertGitHubConfig();
+
     console.log("🚀 Starting GitHub export...");
     console.log("📊 Export data received:");
     console.log(
@@ -29,18 +46,14 @@ export async function exportToGitHub(
     if (data.variablesByTheme && data.themes && data.themes.length > 0) {
       console.log("✅ Multi-theme mode activated!");
       console.log("   Themes to export:", data.themes);
-      const themeOutput = buildThemeAwareOutput(data.variablesByTheme);
-      console.log(
-        "🎨 Theme-aware SCSS files generated:",
-        Object.keys(themeOutput)
-      );
+      const themeOutput = buildThemeAwareCssOutput(data.variablesByTheme);
+      console.log("🎨 Theme-aware CSS files generated:", Object.keys(themeOutput));
 
-      // Push all themes in a single commit
       const totalThemes = Object.keys(themeOutput).length;
       const totalVariables = data.variables?.length || 0;
 
       console.log(`📤 Pushing ${totalThemes} theme(s) in a single commit...`);
-      const githubResult = await pushAllThemesToGitHub(themeOutput);
+      const githubResult = await pushCssThemesToGitHub(themeOutput);
 
       if (githubResult.success) {
         console.log(`✅ All themes pushed successfully in one commit`);
@@ -58,34 +71,8 @@ export async function exportToGitHub(
     } else {
       // Fallback to single theme export
       console.log("⚠️ FALLING BACK TO SINGLE THEME MODE!");
-      console.log(
-        "   Reason:",
-        !data.variablesByTheme
-          ? "variablesByTheme is missing/empty"
-          : !data.themes
-          ? "themes is missing"
-          : data.themes.length === 0
-          ? "themes array is empty"
-          : "unknown"
-      );
-      console.log("🔍 About to call buildSupernovaOutput with data.variables:");
-      console.log("   Type:", typeof data.variables);
-      console.log("   Is Array:", Array.isArray(data.variables));
-      console.log("   Length:", data.variables?.length || 0);
-      if (data.variables && data.variables.length > 0) {
-        console.log("   First 3 items:", data.variables.slice(0, 3));
-      }
-
-      const supernovaOutput = buildSupernovaOutput(data.variables);
-      console.log(
-        "🎨 Single theme SCSS files generated:",
-        Object.keys(supernovaOutput)
-      );
-
-      const githubResult = await pushScssFilesToGitHub(
-        supernovaOutput,
-        "theme"
-      );
+      const cssOutput = buildCssOutput(data.variables);
+      const githubResult = await pushCssThemesToGitHub({ theme: cssOutput });
 
       const totalVariables = data.variables?.length || 0;
 

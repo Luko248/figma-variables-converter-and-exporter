@@ -11,8 +11,7 @@ export type {
   ProcessedVariable,
   VariablesByTheme,
   ConversionResult,
-  ScssFileOutput,
-  ThemeScssOutput,
+  ThemeCssOutput,
   VariableCategory,
 } from "./variable.types";
 
