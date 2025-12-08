@@ -116,22 +116,13 @@ async function handleExportToGitHub(): Promise<{ success: boolean; message: stri
 function main() {
   try {
     console.log("🚀 Plugin starting...");
-
-    // Get editor type
-    const editorType = figma.editorType;
-    console.log("📍 Editor type:", editorType);
+    console.log("📍 Editor type:", figma.editorType);
 
     // Show the UI
     figma.showUI(__html__, {
       width: 420,
       height: 580,
       themeColors: true,
-    });
-
-    // Send editor type to UI to configure visible tabs
-    figma.ui.postMessage({
-      type: "editor-type",
-      data: { editorType },
     });
 
     console.log("✅ UI loaded successfully");
@@ -164,6 +155,15 @@ function main() {
 
     try {
       switch (type) {
+        // UI Ready
+        case "ui-ready":
+          // Send editor type when UI is ready
+          figma.ui.postMessage({
+            type: "editor-type",
+            data: { editorType: figma.editorType },
+          });
+          break;
+
         // Collection Management
         case "load-collections":
           try {
