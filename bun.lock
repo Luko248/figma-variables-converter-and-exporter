@@ -3,7 +3,9 @@
   "workspaces": {
     "": {
       "name": "figma-css-variables-converter",
-      "dependencies": {},
+      "dependencies": {
+        "colorizr": "^3.0.8",
+      },
       "devDependencies": {
         "@figma/eslint-plugin-figma-plugins": "*",
         "@figma/plugin-typings": "*",
@@ -92,6 +94,7 @@
 
     "color-name": ["color-name@1.1.4", "", {}, "sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA=="],
 
+    "colorizr": ["colorizr@3.0.8", "", {}, "sha512-5B5bNiGU/iEbdL3JsiIYRf57T0CuJjHSgVfe3SP3W3ePe2waJuEYl+llzwm1ZhxIcVyA+gThRlBu3yXBV3tAQQ=="],
 
     "concat-map": ["concat-map@0.0.1", "", {}, "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="],
 

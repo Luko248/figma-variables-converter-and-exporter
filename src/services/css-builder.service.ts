@@ -35,41 +35,7 @@ const groupVariablesByType = (variables: CSSVariable[]): GroupedVariables => {
   return grouped;
 };
 
-const classifyTier = (name: string): "core" | "semantic" | "component" => {
-  const lower = name.toLowerCase();
-  // Component: contains component-ish hints
-  if (
-    lower.includes("button") ||
-    lower.includes("btn") ||
-    lower.includes("input") ||
-    lower.includes("card") ||
-    lower.includes("modal") ||
-    lower.includes("tooltip")
-  ) {
-    return "component";
-  }
-
-  // Semantic: prefixed with color/ fonts/ measures and includes primary/secondary/success/etc.
-  if (
-    (lower.startsWith("--color") ||
-      lower.startsWith("--fonts") ||
-      lower.startsWith("--measures")) &&
-    (lower.includes("primary") ||
-      lower.includes("secondary") ||
-      lower.includes("success") ||
-      lower.includes("warning") ||
-      lower.includes("error") ||
-      lower.includes("info") ||
-      lower.includes("neutral"))
-  ) {
-    return "semantic";
-  }
-
-  // Default to core
-  return "core";
-};
-
-const formatByTier = (
+const formatSection = (
   type: VariableCategory,
   variables: Array<{ name: string; value: string }>
 ): string => {
@@ -77,43 +43,13 @@ const formatByTier = (
     return `  /* ${SECTION_LABELS[type]} */`;
   }
 
-  const tiers = {
-    core: [] as Array<{ name: string; value: string }>,
-    semantic: [] as Array<{ name: string; value: string }>,
-    component: [] as Array<{ name: string; value: string }>,
-  };
-
-  variables.forEach((v) => {
-    tiers[classifyTier(v.name)].push(v);
-  });
-
-  const buildTier = (label: string, items: Array<{ name: string; value: string }>) => {
-    if (!items.length) return "";
-    const lines = items
-      .slice()
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((variable) => `  ${variable.name}: ${variable.value};`)
-      .join("\n");
-    return [`  /* ${label} */`, lines].join("\n");
-  };
-
-  const segments = [
-    `  /* ${SECTION_LABELS[type]} */`,
-    buildTier("Core", tiers.core),
-    buildTier("Semantic", tiers.semantic),
-    buildTier("Component", tiers.component),
-  ]
-    .filter(Boolean)
+  const lines = variables
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((variable) => `  ${variable.name}: ${variable.value};`)
     .join("\n");
 
-  return segments;
-};
-
-const formatSection = (
-  type: VariableCategory,
-  variables: Array<{ name: string; value: string }>
-): string => {
-  return formatByTier(type, variables);
+  return [`  /* ${SECTION_LABELS[type]} */`, lines].join("\n");
 };
 
 /**

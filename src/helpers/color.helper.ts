@@ -1,7 +1,7 @@
 /**
  * Color conversion helper functions
  */
-
+import Colorizr from "colorizr";
 import "../types/figma.types";
 
 /** Clamps value to 0-1 range */
@@ -144,4 +144,19 @@ export const convertColorToHsl = (colorValue: RGB | RGBA): string => {
   }
 
   return rgbToHsl(clampedR, clampedG, clampedB);
+};
+
+/**
+ * Converts RGB/RGBA color to OKLCH format.
+ * Output format: oklch(l c h / a) with spaces, no commas.
+ */
+export const convertColorToOklch = (colorValue: RGB | RGBA): string => {
+    const r = Math.round(clampColorComponent(colorValue.r) * 255);
+    const g = Math.round(clampColorComponent(colorValue.g) * 255);
+    const b = Math.round(clampColorComponent(colorValue.b) * 255);
+    const alpha = "a" in colorValue ? clampColorComponent(colorValue.a) : 1;
+
+    const color = new Colorizr({ r, g, b, alpha });
+    // Colorizr outputs OKLCH with spaces and no commas by default: oklch(l c h / a)
+    return color.format('oklch');
 };

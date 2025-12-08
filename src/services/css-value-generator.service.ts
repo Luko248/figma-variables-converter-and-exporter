@@ -9,10 +9,10 @@ import {
   safeStringConversion,
   resolveAliasToRawValue,
 } from "./value-converter.service";
-import { FALLBACK_HSL_COLOR } from "../constants/conversion.constants";
+import { FALLBACK_OKLCH_COLOR } from "../constants/conversion.constants";
 
 /**
- * Converts color variables to HSL format
+ * Converts color variables to OKLCH format
  */
 const convertColorValue = async (
   variable: Variable,
@@ -22,7 +22,7 @@ const convertColorValue = async (
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
     console.warn(`⚠️ No color modes found for ${variable.name}`);
-    return FALLBACK_HSL_COLOR;
+    return FALLBACK_OKLCH_COLOR;
   }
 
   const targetModeId = modeId || Object.keys(valuesByMode)[0];
@@ -51,7 +51,7 @@ const convertColorValue = async (
     console.error(
       `❌ FAILED to resolve alias for ${variable.name} (alias ID: ${aliasId})`
     );
-    return FALLBACK_HSL_COLOR;
+    return FALLBACK_OKLCH_COLOR;
   }
 
   const colorValue = rawValue as RGB | RGBA;
@@ -60,7 +60,7 @@ const convertColorValue = async (
     console.warn(
       `⚠️ No color value found for mode ${targetModeId} in ${variable.name}`
     );
-    return FALLBACK_HSL_COLOR;
+    return FALLBACK_OKLCH_COLOR;
   }
 
   return safeColorConversion(colorValue, variable.name);

@@ -3,7 +3,7 @@
  */
 
 /** Fallback color value when conversion fails */
-export const FALLBACK_HSL_COLOR = "hsl(0 0% 0%)";
+export const FALLBACK_OKLCH_COLOR = "oklch(0 0 0)";
 
 /** Base font size for rem conversion (in pixels) */
 export const BASE_FONT_SIZE = 16;

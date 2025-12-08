@@ -3,13 +3,13 @@
  */
 
 import "../types/figma.types";
-import { 
-  convertColorToHsl 
+import {
+  convertColorToOklch
 } from "../helpers/color.helper";
 import { pxToRem, isValidNumber, clamp } from "../helpers/numeric.helper";
 import { sanitizeString, hasPotentiallyUnsafeChars } from "../helpers/string.helper";
 import {
-  FALLBACK_HSL_COLOR,
+  FALLBACK_OKLCH_COLOR,
   MIN_FONT_WEIGHT,
   MAX_FONT_WEIGHT,
 } from "../constants/conversion.constants";
@@ -32,13 +32,13 @@ export const safeColorConversion = (
       console.warn(
         `⚠️ Invalid color value for ${variableName}, using fallback`
       );
-      return FALLBACK_HSL_COLOR;
+      return FALLBACK_OKLCH_COLOR;
     }
 
-    return convertColorToHsl(colorValue);
+    return convertColorToOklch(colorValue);
   } catch (error) {
     console.error(`❌ Error converting color for ${variableName}:`, error);
-    return FALLBACK_HSL_COLOR;
+    return FALLBACK_OKLCH_COLOR;
   }
 };
 
