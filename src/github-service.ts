@@ -80,9 +80,12 @@ export async function pushCssThemesToGitHub(
 
     if (!baseSha) {
       throw new Error(
-        `Failed to resolve base branch (${baseBranchCandidates.join(
-          ", "
-        )}). Cannot create feature branch.`
+        `Failed to resolve base branch. Neither 'master' nor 'main' branch exists in your repository.\n\n` +
+        `Please check:\n` +
+        `1. Repository ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo} exists\n` +
+        `2. Your GitHub token has correct permissions (repo scope)\n` +
+        `3. At least one of these branches exists: ${baseBranchCandidates.join(", ")}\n\n` +
+        `If your default branch has a different name, please create either 'main' or 'master' branch first.`
       );
     }
 
