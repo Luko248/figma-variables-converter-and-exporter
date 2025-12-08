@@ -87,6 +87,8 @@ declare global {
         themeColors?: boolean;
       }
     ): void;
+    /** Editor type - 'figma' for design mode, 'dev' for dev mode */
+    editorType: 'figma' | 'dev';
   };
 
   /** Global variable containing the UI HTML */

@@ -117,11 +117,21 @@ function main() {
   try {
     console.log("🚀 Plugin starting...");
 
+    // Get editor type
+    const editorType = figma.editorType;
+    console.log("📍 Editor type:", editorType);
+
     // Show the UI
     figma.showUI(__html__, {
-      width: 320,
+      width: 420,
       height: 580,
       themeColors: true,
+    });
+
+    // Send editor type to UI to configure visible tabs
+    figma.ui.postMessage({
+      type: "editor-type",
+      data: { editorType },
     });
 
     console.log("✅ UI loaded successfully");
@@ -150,8 +160,7 @@ function main() {
       };
     };
 
-    const { type, collectionId, name, variableId, value, variableType } =
-      message;
+    const { type, collectionId } = message;
 
     try {
       switch (type) {

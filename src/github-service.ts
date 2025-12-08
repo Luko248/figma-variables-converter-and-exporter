@@ -55,8 +55,6 @@ export async function pushCssThemesToGitHub(
       );
     }
 
-    const exportTimestamp = new Date().toISOString();
-
     // Resolve base branch (prefer master, fallback to main)
     const baseBranchCandidates = ["master", "main"];
     let baseBranch = baseBranchCandidates[0];

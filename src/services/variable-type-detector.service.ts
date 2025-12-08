@@ -3,16 +3,9 @@
  */
 
 import {
-  MEASURES_KEYWORDS,
   FONTS_KEYWORDS,
 } from "../constants/token-patterns";
 import { VariableCategory } from "../types/index";
-
-/**
- * Checks if variable is a measures type
- */
-const isMeasuresVariable = (name: string): boolean =>
-  MEASURES_KEYWORDS.some((term) => name.includes(term));
 
 /**
  * Checks if variable is a fonts type

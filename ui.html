@@ -739,6 +739,7 @@
         let selectedCollection = null;
         let variables = [];
         let convertedVariables = null;
+        let editorType = 'figma'; // Default to figma editor
 
         // Utility Functions
         function showStatus(message, type = 'info') {
@@ -945,11 +946,45 @@
             }
         });
 
+        // Configure UI based on editor type
+        function configureUIForEditorType(type) {
+            editorType = type;
+            console.log('🎨 Configuring UI for editor type:', type);
+
+            if (type === 'dev') {
+                // In dev mode, hide Design Tokens and Exporter tabs
+                const designTokensTab = document.querySelector('[data-tab="design-tokens"]');
+                const exporterTab = document.querySelector('[data-tab="exporter"]');
+
+                if (designTokensTab) designTokensTab.style.display = 'none';
+                if (exporterTab) exporterTab.style.display = 'none';
+
+                // Switch to converter tab
+                switchTab('converter');
+
+                console.log('✅ Dev mode UI configured - showing only Converter tab');
+            } else {
+                // In figma editor, show all tabs
+                const designTokensTab = document.querySelector('[data-tab="design-tokens"]');
+                const exporterTab = document.querySelector('[data-tab="exporter"]');
+
+                if (designTokensTab) designTokensTab.style.display = '';
+                if (exporterTab) exporterTab.style.display = '';
+
+                console.log('✅ Figma editor UI configured - showing all tabs');
+            }
+        }
+
         // Message Handler
         window.addEventListener('message', (event) => {
             const { type, data } = event.data.pluginMessage || {};
 
             switch (type) {
+                // Editor Type Configuration
+                case 'editor-type':
+                    configureUIForEditorType(data.editorType);
+                    break;
+
                 // Design Tokens Messages
                 case 'collections-loaded':
                     renderCollections(data.collections);
@@ -1004,8 +1039,11 @@
             }
         });
 
-        // Initialize the Design Tokens tab
-        loadCollections();
+        // Initialize the Design Tokens tab (will be skipped if in dev mode)
+        // The configureUIForEditorType will be called when the plugin sends the editor-type message
+        if (editorType !== 'dev') {
+            loadCollections();
+        }
     </script>
 </body>
 </html>

@@ -5,11 +5,11 @@
   "main": "code.js",
   "scripts": {
     "prebuild": "node build-config.js",
-    "build": "ncc build src/main.ts -o . --target es2017 --no-source-map-register --no-asset-builds && mv index.js code.js && node fix-figma-compat.js",
+    "build": "npm run prebuild && npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser && node fix-figma-compat.js",
     "clean": "rm -f code.js && rm -rf dist",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run prebuild && ncc build src/main.ts -o . --target es2017 --no-source-map-register --no-asset-builds --watch",
+    "watch": "npm run prebuild && npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser --watch",
     "config": "node build-config.js"
   },
   "author": "Lukas Chylik",
