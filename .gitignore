@@ -8,7 +8,6 @@ yarn-error.log*
 dist/
 build/
 *.js
-!build-config.js
 !fix-figma-compat.js
 *.js.map
 

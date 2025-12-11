@@ -62,6 +62,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .header {
@@ -122,23 +123,47 @@
             display: flex;
             border-bottom: 1px solid var(--border);
             background: var(--panel);
+            padding: 12px 16px;
+            gap: 8px;
         }
 
         .tab {
             flex: 1;
-            padding: 12px 8px;
-            text-align: center;
+            padding: 10px 12px;
+            text-align: left;
             cursor: pointer;
             border: none;
-            background: transparent;
+            background: var(--panel-strong);
             font-size: 11px;
             font-weight: 500;
             color: var(--muted);
             transition: all 0.2s ease;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tab::before {
+            content: attr(data-step);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--border);
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
         }
 
         .tab:hover {
-            background: var(--panel-strong);
+            background: var(--panel);
+            border-color: var(--accent);
             color: var(--text);
         }
 
@@ -146,13 +171,20 @@
             background: var(--bg);
             color: var(--accent);
             font-weight: 600;
-            border-bottom: 2px solid var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(13, 153, 255, 0.15);
+        }
+
+        .tab.active::before {
+            background: var(--accent);
+            color: #ffffff;
         }
 
         .tab-content {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
+            padding-bottom: 100px;
         }
 
         .tab-panel {
@@ -466,6 +498,38 @@
             padding: 8px 16px;
             width: auto;
         }
+
+        /* Fixed Action Bar with Glassmorphism */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+        }
+
+        [data-theme="dark"] .action-bar {
+            background: rgba(15, 17, 21, 0.85);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-bar .button {
+            margin-bottom: 0;
+        }
+
+        .action-bar-content {
+            display: none;
+        }
+
+        .action-bar-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -485,9 +549,9 @@
     <div id="status-message" class="status status-info">Ready to process variables</div>
 
     <div class="tabs">
-        <button class="tab active" data-tab="design-tokens">Design Tokens</button>
-        <button class="tab" data-tab="converter">Converter</button>
-        <button class="tab" data-tab="exporter">Exporter</button>
+        <button class="tab active" data-tab="design-tokens" data-step="1">Design Tokens</button>
+        <button class="tab" data-tab="converter" data-step="2">Converter</button>
+        <button class="tab" data-tab="exporter" data-step="3">Exporter</button>
     </div>
 
     <div class="tab-content">
@@ -525,10 +589,6 @@
                 <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
                     Updates Figma web devmode with CSS variable names
                 </p>
-                <button id="convert-btn" class="button button-primary">
-                    <span class="icon">🔄</span>
-                    Convert Variables to Dev Format
-                </button>
                 <div id="variables-count" class="variables-count hidden"></div>
             </div>
         </div>
@@ -557,23 +617,44 @@
                     <label class="form-label" for="gh-token">GitHub Access Token</label>
                     <input id="gh-token" class="form-input" type="password" placeholder="Requires repo scope" autocomplete="off" />
                 </div>
-                
-                <button id="save-config-btn" class="button button-secondary" style="margin-bottom: 16px;">
-                    <span class="icon">💾</span>
-                    Save Settings
-                </button>
-                <div id="config-status" class="hidden" style="font-size: 10px; color: var(--muted); margin-top: -8px; margin-bottom: 16px; text-align: center;">
+
+                <div id="config-status" class="hidden" style="font-size: 10px; color: var(--muted); margin-top: 8px; margin-bottom: 16px; text-align: center;">
                     Settings are saved locally and sent to the plugin for this session.
                 </div>
-
-                <button id="export-btn" class="button button-primary" disabled>
-                    <span class="icon">📤</span>
-                    Export CSS to GitHub
-                </button>
                 <div id="export-status" class="hidden" style="font-size: 10px; color: #8c8c8c; margin-top: 8px; text-align: center;">
                     Convert variables first to enable export
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Fixed Action Bar -->
+    <div class="action-bar">
+        <!-- Design Tokens Actions -->
+        <div id="action-design-tokens" class="action-bar-content active">
+            <p style="font-size: 10px; color: var(--muted); text-align: center; margin-bottom: 8px;">
+                View and manage your Figma design token collections
+            </p>
+        </div>
+
+        <!-- Converter Actions -->
+        <div id="action-converter" class="action-bar-content">
+            <button id="convert-btn" class="button button-primary">
+                <span class="icon">🔄</span>
+                Convert Variables to Dev Format
+            </button>
+        </div>
+
+        <!-- Exporter Actions -->
+        <div id="action-exporter" class="action-bar-content">
+            <button id="save-config-btn" class="button button-secondary" style="margin-bottom: 8px;">
+                <span class="icon">💾</span>
+                Save Settings
+            </button>
+            <button id="export-btn" class="button button-primary" disabled>
+                <span class="icon">📤</span>
+                Export CSS to GitHub
+            </button>
         </div>
     </div>
 
@@ -790,6 +871,14 @@
                 targetPanelElement.classList.add('active');
             }
 
+            // Update action bar to show relevant actions
+            const actionBarContents = document.querySelectorAll('.action-bar-content');
+            actionBarContents.forEach(content => content.classList.remove('active'));
+            const activeActionBar = document.getElementById(`action-${targetTab}`);
+            if (activeActionBar) {
+                activeActionBar.classList.add('active');
+            }
+
             // Load data for Design Tokens tab
             if (targetTab === 'design-tokens') {
                 loadCollections();
@@ -991,6 +1080,12 @@
                 if (designTokensPanel) designTokensPanel.classList.remove('active');
                 if (exporterPanel) exporterPanel.classList.remove('active');
                 if (converterPanel) converterPanel.classList.add('active');
+
+                // Update action bar
+                const actionBarContents = document.querySelectorAll('.action-bar-content');
+                actionBarContents.forEach(content => content.classList.remove('active'));
+                const converterActionBar = document.getElementById('action-converter');
+                if (converterActionBar) converterActionBar.classList.add('active');
 
                 console.log('✅ Dev mode UI configured - showing only Converter tab');
             } else {

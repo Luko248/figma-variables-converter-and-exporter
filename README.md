@@ -1,19 +1,42 @@
-# Figma CSS Variables Converter (Raw CSS)
+# Figma CSS Variables Converter & Exporter
 
-Converts Figma variables into plain CSS custom properties and pushes them to GitHub. The output mirrors your Figma values and is grouped into Colors, Fonts, and Measures inside a single `:root` block for each theme.
+A Figma plugin that converts Figma design variables into modern CSS custom properties with **OKLCH color space** and **rem-based sizing**, then exports them to GitHub.
 
-## Core Functionality
-- **Figma Dev Mode Integration**: Updates dev mode syntax so variables appear as `var(--primary)`, `var(--bodyFamily)`, etc.
-- **GitHub CSS Export**: Generates one CSS file per theme with grouped sections and uploads them in a single commit.
+## What This Plugin Does
+
+1. **Converts Figma Variables to CSS**: Transforms your Figma design tokens into production-ready CSS variables
+   - **Colors**: Converted to modern OKLCH color space for better perceptual uniformity
+   - **Sizing/Spacing**: Automatically converted from pixels to rem units (16px base)
+   - **Typography**: Exports font families, weights, and sizes as CSS variables
+
+2. **Updates Figma Dev Mode**: Changes the dev mode display so variables appear as `var(--primary)`, `var(--spacing8)`, making them ready to copy-paste into your code
+
+3. **Exports to GitHub**: Pushes generated CSS files directly to your GitHub repository
+   - Creates a new feature branch automatically
+   - One CSS file per theme (light, dark, high-contrast, etc.)
+   - All files committed in a single, organized commit
 
 ## Features
-- Raw CSS output (no SCSS or Supernova mixins)
-- Grouped sections with comments: Colors → Fonts → Measures
-- Name-based type detection: `color` → Colors, `fontFamily`/`fontWeight`/`fontSize` → Fonts, everything else → Measures
-- Multi-theme support with sanitized theme slugs (kebab-case; `-light` suffix removed) and one CSS file per theme in its own folder
-- Alias resolution for Figma variable references
-- Rem-based sizing and HSL color conversion with alpha support
-- Export flow: always base on `master`, create a feature branch, and push the generated CSS files to that branch in one commit
+
+### Color Conversion
+- **OKLCH Color Space**: All colors converted to modern `oklch()` format for better perceptual uniformity and color accuracy
+- **Alpha Channel Support**: Transparent colors maintain their opacity with `/ 0.5` syntax
+- **Example**: Figma color `rgb(100, 150, 255, 0.8)` → `oklch(0.65 0.2 250 / 0.8)`
+
+### Sizing & Spacing
+- **Rem-based Units**: All pixel values automatically converted to rem (16px base)
+- **Number Preservation**: Variable names keep their numbers intact (`spacing8`, `spacing16`, `spacing24`)
+- **Example**: Figma `spacing/16` at 16px → `--spacing16: 1rem`
+
+### File Organization
+- **Multi-theme Support**: One CSS file per theme in its own folder
+- **Grouped Sections**: Variables organized by type (Colors → Fonts → Measures)
+- **Clean Naming**: Theme folders in kebab-case, `-light` suffix removed for base themes
+
+### Smart Conversion
+- **Alias Resolution**: Figma variable references automatically resolved to their values
+- **Type Detection**: Automatically categorizes variables based on name patterns
+- **GitHub Integration**: Direct export to repository with feature branch creation
 
 ## Example Output
 
@@ -25,8 +48,8 @@ Converts Figma variables into plain CSS custom properties and pushes them to Git
  */
 :root {
   /* Colors */
-  --primary: hsl(200 75% 60%);
-  --surface: hsl(0 0% 98%);
+  --primary: oklch(0.65 0.2 250);
+  --surface: oklch(0.98 0.01 180 / 0.95);
 
   /* Fonts */
   --bodyFamily: "Inter";
@@ -34,7 +57,8 @@ Converts Figma variables into plain CSS custom properties and pushes them to Git
   --bodySize: 1rem;
 
   /* Measures */
-  --spacingMd: 1rem;
+  --spacing8: 0.5rem;
+  --spacing16: 1rem;
   --radiusSm: 0.25rem;
 }
 ```

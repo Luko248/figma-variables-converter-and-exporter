@@ -51,9 +51,9 @@ Pure utility functions with no side effects. Single responsibility principle.
 
 **Files:**
 - `cache.helper.ts` - Caching utilities and object pooling for performance
-- `color.helper.ts` - Color conversion functions (RGB/RGBA to HSL)
+- `color.helper.ts` - Color conversion functions (RGB/RGBA to OKLCH)
 - `numeric.helper.ts` - Numeric operations (px to rem, clamping, rounding)
-- `string.helper.ts` - String manipulation (kebab-case, sanitization, base64)
+- `string.helper.ts` - String manipulation (camelCase with number preservation, sanitization, base64)
 
 ### 3. **Services** (`services/`)
 Business logic and orchestration. Services can depend on helpers and other services.
@@ -76,21 +76,21 @@ TypeScript type definitions organized by domain.
 - `github.types.ts` - GitHub API request/response types
 - `index.ts` - Central export point for all types
 
-### UI / Runtime Config
-- `ui.html` - Plugin UI with tabs for tokens, converter, exporter, and settings; stores GitHub settings locally and sends them to the plugin each session.
-
 ### 5. **Integration** (Root level)
 - `github-service.ts` - GitHub API integration (creates commits, pushes files)
-- `config.ts` - Session config for GitHub values received from the UI
+- `config.ts` - Runtime configuration (updated via UI messages, no file loading)
 - `main.ts` - Plugin entry point and UI message handling
+- `ui.html` - Plugin UI with step-based tabs, glassmorphism action bar, localStorage for GitHub settings
 
 ## Naming Conventions
 
 ### Token Types (CSS Variables)
-Variables are named in camelCase matching their Figma names without type prefixes:
+Variables are named in camelCase matching their Figma names, with numbers preserved:
 - **color**: `--primary`, `--btnBackground`
-- **measures**: `--spacingSm`, `--borderRadius`
-- **fonts**: `--weightBold`, `--familyBase`
+- **measures**: `--spacing8`, `--spacing16`, `--borderRadius`
+- **fonts**: `--weightBold`, `--familyBase`, `--size16`
+
+**Important**: Numbers are preserved in variable names (e.g., `spacing/8` → `--spacing8`)
 
 ## Key Design Decisions
 
@@ -112,9 +112,10 @@ Variables are named in camelCase matching their Figma names without type prefixe
 
 ## Build Process
 
-1. **prebuild**: Injects config from `config.json` or example/stub → `src/config.ts` (runtime config is still driven by the UI)
-2. **build**: Bundles all TypeScript with `@vercel/ncc` → `code.js`
-3. **post-build**: Removes Node.js incompatible code via `fix-figma-compat.js` (kept for Figma runtime safety)
+1. **build**: Bundles all TypeScript with esbuild → `code.js` (ES2017, IIFE format for Figma runtime)
+2. **post-build**: Removes Node.js incompatible code via `fix-figma-compat.js` (ensures Figma runtime compatibility)
+
+**Configuration**: No build-time config injection. All GitHub settings are configured by users in the UI and stored in localStorage.
 
 ## Export Branching Strategy
 - Base fetched from `master` (fallback to configured branch or `main`).

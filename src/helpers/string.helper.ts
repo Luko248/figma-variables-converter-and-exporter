@@ -8,20 +8,25 @@
  * - "btn/large/paddingBlock" → "BtnLargePaddingBlock"
  * - "spacing-btn-large" → "SpacingBtnLarge"
  * - "Button/Primary/Background" → "ButtonPrimaryBackground"
+ * - "spacing/8" → "Spacing8"
+ * - "spacing/16" → "Spacing16"
+ * - "spacing8" → "Spacing8"
  */
 export const cleanVariableName = (name: string): string => {
   // Split by common separators: /, -, _, space
   const parts = name.split(/[/\-_\s]+/).filter((part) => part.length > 0);
 
-  // Capitalize first letter of each part while preserving existing camelCase
+  // Capitalize first letter of each part while preserving numbers
   const camelCased = parts
     .map((part) => {
-      // Remove leading numbers from each part
-      const cleaned = part.replace(/^\d+/, "");
-      if (cleaned.length === 0) return "";
+      // If part is purely numeric, keep it as-is (e.g., "8", "16", "24")
+      if (/^\d+$/.test(part)) {
+        return part;
+      }
 
-      // Capitalize first letter, keep rest as-is (preserving existing camelCase)
-      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      // For mixed alphanumeric, capitalize first letter
+      // This preserves numbers at the end (e.g., "spacing8" → "Spacing8")
+      return part.charAt(0).toUpperCase() + part.slice(1);
     })
     .filter((part) => part.length > 0)
     .join("");

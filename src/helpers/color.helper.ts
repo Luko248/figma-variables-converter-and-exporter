@@ -147,8 +147,26 @@ export const convertColorToHsl = (colorValue: RGB | RGBA): string => {
 };
 
 /**
+ * Formats a number for OKLCH values
+ * Removes unnecessary trailing zeros but keeps decimal precision
+ * Examples: 1.000 → 1, 0.750 → 0.75, 0.500 → 0.5
+ */
+const formatOklchNumber = (value: number): string => {
+  // Convert to string with sufficient precision
+  let formatted = value.toFixed(3);
+
+  // Remove trailing zeros after decimal point
+  if (formatted.includes('.')) {
+    formatted = formatted.replace(/\.?0+$/, '');
+  }
+
+  return formatted;
+};
+
+/**
  * Converts RGB/RGBA color to OKLCH format.
  * Output format: oklch(l c h / a) with spaces, no commas.
+ * Numbers are formatted to remove unnecessary trailing zeros.
  */
 export const convertColorToOklch = (colorValue: RGB | RGBA): string => {
     const r = Math.round(clampColorComponent(colorValue.r) * 255);
@@ -157,6 +175,18 @@ export const convertColorToOklch = (colorValue: RGB | RGBA): string => {
     const alpha = "a" in colorValue ? clampColorComponent(colorValue.a) : 1;
 
     const color = new Colorizr({ r, g, b, alpha });
-    // Colorizr outputs OKLCH with spaces and no commas by default: oklch(l c h / a)
-    return color.format('oklch');
+
+    // Get OKLCH values from Colorizr
+    const oklchValues = color.oklch();
+    const l = formatOklchNumber(oklchValues.l);
+    const c = formatOklchNumber(oklchValues.c);
+    const h = formatOklchNumber(oklchValues.h);
+
+    // Format OKLCH string with properly formatted numbers
+    if (alpha < 1) {
+      const a = formatOklchNumber(alpha);
+      return `oklch(${l} ${c} ${h} / ${a})`;
+    }
+
+    return `oklch(${l} ${c} ${h})`;
 };

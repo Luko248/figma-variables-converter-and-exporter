@@ -5,28 +5,21 @@ import { base64Encode } from "./helpers/string.helper";
 import { GITHUB_CONFIG, GITHUB_API_BASE } from "./config";
 import { GitHubApiResponse, ThemeCssOutput } from "./types/index";
 
-const CET_TIMEZONE = "Europe/Paris";
-
 const formatCETTimestamp = () => {
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    timeZone: CET_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  const parts: Record<string, string> = {};
-  formatter.formatToParts(now).forEach((p) => {
-    if (p.type !== "literal") {
-      parts[p.type] = p.value;
-    }
-  });
+  // Convert to CET (UTC+1) or CEST (UTC+2 during daylight saving)
+  // Using UTC offset approximation since Intl is not available in Figma plugins
+  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const cetTime = new Date(utcTime + (3600000 * 1)); // CET is UTC+1
 
-  const label = `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute} CET`;
-  const slug = `${parts.year}${parts.month}${parts.day}-${parts.hour}${parts.minute}`;
+  const year = cetTime.getFullYear();
+  const month = String(cetTime.getMonth() + 1).padStart(2, '0');
+  const day = String(cetTime.getDate()).padStart(2, '0');
+  const hour = String(cetTime.getHours()).padStart(2, '0');
+  const minute = String(cetTime.getMinutes()).padStart(2, '0');
+
+  const label = `${year}-${month}-${day} ${hour}:${minute} CET`;
+  const slug = `${year}${month}${day}-${hour}${minute}`;
   return { label, slug };
 };
 
@@ -131,8 +124,47 @@ export async function pushCssThemesToGitHub(
           attempt += 1;
           continue;
         }
+
+        // Enhanced error messages for common issues
+        if (createRefResponse.status === 403) {
+          throw new Error(
+            `GitHub Access Denied (403 Forbidden)\n\n` +
+            `Your GitHub token doesn't have the required permissions.\n\n` +
+            `Please create a new Personal Access Token with these permissions:\n` +
+            `• repo (Full control of private repositories)\n` +
+            `• workflow (Update GitHub Action workflows)\n\n` +
+            `To create a token:\n` +
+            `1. Go to: https://github.com/settings/tokens/new\n` +
+            `2. Select scopes: 'repo' and 'workflow'\n` +
+            `3. Generate token and copy it\n` +
+            `4. Update your token in the Exporter tab\n\n` +
+            `Repository: ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
+            `API Response: ${body?.message || createRefResponse.statusText}`
+          );
+        }
+
+        if (createRefResponse.status === 404) {
+          throw new Error(
+            `Repository Not Found (404)\n\n` +
+            `The repository '${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}' doesn't exist or you don't have access to it.\n\n` +
+            `Please verify:\n` +
+            `• Repository name is correct\n` +
+            `• Repository exists at: https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
+            `• Your GitHub token has access to this repository`
+          );
+        }
+
+        if (createRefResponse.status === 401) {
+          throw new Error(
+            `Authentication Failed (401 Unauthorized)\n\n` +
+            `Your GitHub token is invalid or expired.\n\n` +
+            `Please create a new token at: https://github.com/settings/tokens/new`
+          );
+        }
+
         throw new Error(
-          `Failed to create branch ${branchName}: ${createRefResponse.status} ${createRefResponse.statusText}`
+          `Failed to create branch ${branchName}: ${createRefResponse.status} ${createRefResponse.statusText}\n` +
+          `${body?.message || ''}`
         );
       }
     }

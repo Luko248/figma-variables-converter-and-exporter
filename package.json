@@ -4,13 +4,11 @@
   "description": "Figma plugin to convert Figma variables to CSS variables and push to GitHub",
   "main": "code.js",
   "scripts": {
-    "prebuild": "node build-config.js",
-    "build": "npm run prebuild && npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser && node fix-figma-compat.js",
+    "build": "npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser && node fix-figma-compat.js",
     "clean": "rm -f code.js && rm -rf dist",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run prebuild && npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser --watch",
-    "config": "node build-config.js"
+    "watch": "npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser --watch"
   },
   "author": "Lukas Chylik",
   "license": "MIT",
