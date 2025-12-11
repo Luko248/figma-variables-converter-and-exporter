@@ -1,6 +1,6 @@
 {
-  "name": "Figma CSS Variables Convertor and Exporter",
-  "id": "1527312977182873836",
+  "name": "Figma CSS Variables Converter and Exporter",
+  "id": "1580865604483451262",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
