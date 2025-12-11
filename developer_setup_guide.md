@@ -45,22 +45,20 @@ npm run build
 
 ## 4. Customize Naming (Optional)
 
-Edit `src/variable-detectors.ts` to add keywords:
-```typescript
-function isSpacingVariable(name: string): boolean {
-  const spacingKeywords = ['spacing', 'margin', 'padding', 'gap'];
-  // Add your keywords here
-}
-```
+Variable names are generated in `src/services/variable-naming.service.ts`.
+The naming is kept simple: Figma variable names are converted to camelCase without type prefixes.
 
-Edit `src/css-generator.ts` to change prefixes:
+To modify naming behavior, edit:
 ```typescript
-case 'COLOR':
-  return `var(--clr-${cleanName})`; // Instead of --color-
-case 'FLOAT':
-  if (isSpacingVariable(variable.name)) {
-    return `var(--space-${cleanName})`; // Instead of --spacing-
-  }
+// src/services/variable-naming.service.ts
+export const generateCSSVariableName = (
+  _collectionName: string,
+  variableName: string
+): string => {
+  let cleanVariable = cleanVariableName(variableName);
+  // Add your custom logic here
+  return `--${cleanVariable}`;
+};
 ```
 
 Rebuild after changes: `npm run build`
@@ -75,9 +73,9 @@ Rebuild after changes: `npm run build`
 ## Output Example
 ```css
 :root {
-  --color-primary-blue: #3b82f6;
-  --spacing-large: 24px;
-  --font-family-inter: 'Inter', sans-serif;
+  --primaryBlue: hsl(217 91% 60%);
+  --spacingLarge: 1.5rem;
+  --familyInter: 'Inter', sans-serif;
 }
 ```
 

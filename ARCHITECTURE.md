@@ -87,9 +87,10 @@ TypeScript type definitions organized by domain.
 ## Naming Conventions
 
 ### Token Types (CSS Variables)
-- **color**: `--colorPrimary`, `--colorBtnBackground`
-- **measures**: `--measuresSpacingSm`, `--measuresBorderRadius`
-- **fonts**: `--fontsWeightBold`, `--fontsFamilyBase`
+Variables are named in camelCase matching their Figma names without type prefixes:
+- **color**: `--primary`, `--btnBackground`
+- **measures**: `--spacingSm`, `--borderRadius`
+- **fonts**: `--weightBold`, `--familyBase`
 
 ## Key Design Decisions
 

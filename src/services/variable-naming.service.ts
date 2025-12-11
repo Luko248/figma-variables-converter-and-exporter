@@ -3,26 +3,22 @@
  */
 
 import { cleanVariableName } from "../helpers/string.helper";
-import { detectVariableType } from "./variable-type-detector.service";
 
 /**
  * Generates a CSS custom property name from a Figma variable
- * Format: --{type}{CleanName} (e.g., --colorBtnBg, --measuresSpaceBtnPadInline)
- * Removes duplicate type prefix if present in variable name
+ * Format: --{cleanName} in camelCase (e.g., --btnBg, --spacingMd, --bodyFamily)
+ * Converts Figma variable names to camelCase without type prefixes
  */
 export const generateCSSVariableName = (
   _collectionName: string,
   variableName: string
 ): string => {
-  const variableType = detectVariableType(variableName);
   let cleanVariable = cleanVariableName(variableName);
-  
-  // Remove duplicate type prefix if it exists at the start of cleanVariable
-  // e.g., "Color/Test Token" becomes "ColorTestToken", but we want just "TestToken"
-  const typeCapitalized = variableType.charAt(0).toUpperCase() + variableType.slice(1);
-  if (cleanVariable.startsWith(typeCapitalized)) {
-    cleanVariable = cleanVariable.slice(typeCapitalized.length);
+
+  // Convert first character to lowercase for camelCase
+  if (cleanVariable.length > 0) {
+    cleanVariable = cleanVariable.charAt(0).toLowerCase() + cleanVariable.slice(1);
   }
 
-  return `--${variableType}${cleanVariable}`;
+  return `--${cleanVariable}`;
 };

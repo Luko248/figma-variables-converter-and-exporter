@@ -3,7 +3,7 @@
 Converts Figma variables into plain CSS custom properties and pushes them to GitHub. The output mirrors your Figma values and is grouped into Colors, Fonts, and Measures inside a single `:root` block for each theme.
 
 ## Core Functionality
-- **Figma Dev Mode Integration**: Updates dev mode syntax so variables appear as `var(--colorPrimary)`, `var(--fontsBodyFamily)`, etc.
+- **Figma Dev Mode Integration**: Updates dev mode syntax so variables appear as `var(--primary)`, `var(--bodyFamily)`, etc.
 - **GitHub CSS Export**: Generates one CSS file per theme with grouped sections and uploads them in a single commit.
 
 ## Features
@@ -25,17 +25,17 @@ Converts Figma variables into plain CSS custom properties and pushes them to Git
  */
 :root {
   /* Colors */
-  --colorPrimary: hsl(200 75% 60%);
-  --colorSurface: hsl(0 0% 98%);
+  --primary: hsl(200 75% 60%);
+  --surface: hsl(0 0% 98%);
 
   /* Fonts */
-  --fontsBodyFamily: "Inter";
-  --fontsBodyWeight: 400;
-  --fontsBodySize: 1rem;
+  --bodyFamily: "Inter";
+  --bodyWeight: 400;
+  --bodySize: 1rem;
 
   /* Measures */
-  --measuresSpacingMd: 1rem;
-  --measuresRadiusSm: 0.25rem;
+  --spacingMd: 1rem;
+  --radiusSm: 0.25rem;
 }
 ```
 
