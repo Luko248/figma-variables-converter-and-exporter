@@ -234,10 +234,12 @@
 
         .status {
             padding: 12px;
-            border-radius: 6px;
             font-size: 11px;
-            margin-bottom: 12px;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
         }
 
         .status-success {
@@ -480,6 +482,8 @@
         </div>
     </div>
 
+    <div id="status-message" class="status status-info">Ready to process variables</div>
+
     <div class="tabs">
         <button class="tab active" data-tab="design-tokens">Design Tokens</button>
         <button class="tab" data-tab="converter">Converter</button>
@@ -487,7 +491,6 @@
     </div>
 
     <div class="tab-content">
-        <div id="status-message" class="status status-info" style="margin: 16px; margin-bottom: 0;">Ready to process variables</div>
 
         <!-- Design Tokens Tab -->
         <div id="design-tokens" class="tab-panel active">
@@ -540,15 +543,15 @@
 
                 <div class="form-group">
                     <label class="form-label" for="gh-owner">GitHub Organization or Username</label>
-                    <input id="gh-owner" class="form-input" type="text" placeholder="e.g. your-github-org" />
+                    <input id="gh-owner" class="form-input" type="text" placeholder="e.g. Luko248" />
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="gh-repo">Repository Name</label>
-                    <input id="gh-repo" class="form-input" type="text" placeholder="e.g. design-system" />
+                    <input id="gh-repo" class="form-input" type="text" placeholder="e.g. figma-variables-test" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="gh-path">File Path in Repository</label>
-                    <input id="gh-path" class="form-input" type="text" placeholder="e.g. src/tokens/variables.css" />
+                    <label class="form-label" for="gh-path">Folder Path in Repository</label>
+                    <input id="gh-path" class="form-input" type="text" placeholder="e.g. src/tokens (files will be created per theme)" />
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="gh-token">GitHub Access Token</label>
@@ -744,16 +747,12 @@
         // Utility Functions
         function showStatus(message, type = 'info') {
             statusMessage.className = `status status-${type}`;
-            statusMessage.style.margin = '16px';
-            statusMessage.style.marginBottom = '0';
             statusMessage.textContent = message;
         }
 
         function hideStatus() {
             // Keep status visible with default message
             statusMessage.className = 'status status-info';
-            statusMessage.style.margin = '16px';
-            statusMessage.style.marginBottom = '0';
             statusMessage.textContent = 'Ready to process variables';
         }
 

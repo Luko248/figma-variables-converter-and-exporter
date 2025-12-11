@@ -45,9 +45,47 @@ Converts Figma variables into plain CSS custom properties and pushes them to Git
 - Each file contains the full `:root` block for that theme.
 
 ## Configuration
-- Open the plugin and go to **Settings**. Enter GitHub owner, repo, path (directory), and a `repo`-scoped token.
-- Settings are stored locally (per machine) and applied each time the plugin runs; no `config.json` is required.
-- Exports always base from `master`, create a feature branch with a timestamped name and commit message, and push one CSS file per theme inside a theme-named folder.
+
+### GitHub Settings
+Open the plugin and go to the **Exporter** tab to configure GitHub export settings:
+
+#### Required Fields
+
+1. **GitHub Organization or Username**
+   - Your GitHub username or organization name
+   - Example: `Luko248`
+   - **NOT** the full URL, just the username/org name
+
+2. **Repository Name**
+   - The name of your repository (not the full URL)
+   - Example: `figma-variables-test`
+   - **NOT** `https://github.com/Luko248/figma-variables-test`
+
+3. **Folder Path in Repository**
+   - The folder where theme files will be created
+   - Example: `src/tokens` or `styles/variables`
+   - **Important**: This is a folder path, not a file path
+   - Multiple files will be created inside this folder (one per theme)
+   - Each theme creates its own subfolder: `src/tokens/dark/variables.css`, `src/tokens/light/variables.css`
+
+4. **GitHub Access Token**
+   - Personal Access Token with `repo` scope
+   - Create one at: https://github.com/settings/tokens
+   - Required permissions: `repo` (full control of private repositories)
+
+#### Example Configuration
+```
+GitHub Username: Luko248
+Repository Name: figma-variables-test
+Folder Path: src/tokens
+Token: ghp_xxxxxxxxxxxxxxxxxxxx (with repo scope)
+```
+
+#### Notes
+- Settings are stored locally in your browser (per machine)
+- No `config.json` file is needed
+- The plugin will create a feature branch from `master` or `main`
+- Each export creates a new timestamped branch with all theme files in a single commit
 
 ## Development
 1. Install dependencies: `npm install`
