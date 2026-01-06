@@ -23,12 +23,16 @@ let lastConversionResult: ConversionResult | null = null;
  */
 async function loadGitHubConfigFromStorage(): Promise<void> {
   try {
-    const storedConfig = await figma.clientStorage.getAsync(GITHUB_CONFIG_STORAGE_KEY) as {
-      owner?: string;
-      repo?: string;
-      path?: string;
-      token?: string;
-    } | undefined;
+    const storedConfig = (await figma.clientStorage.getAsync(
+      GITHUB_CONFIG_STORAGE_KEY
+    )) as
+      | {
+          owner?: string;
+          repo?: string;
+          path?: string;
+          token?: string;
+        }
+      | undefined;
 
     if (storedConfig) {
       if (storedConfig.owner) GITHUB_CONFIG.owner = storedConfig.owner;
@@ -146,7 +150,10 @@ async function handleConvertVariables(): Promise<ConversionResult> {
 /**
  * Wrapper for export with cached result
  */
-async function handleExportToGitHub(): Promise<{ success: boolean; message: string }> {
+async function handleExportToGitHub(): Promise<{
+  success: boolean;
+  message: string;
+}> {
   if (!lastConversionResult) {
     throw new Error("No variables to export. Please convert variables first.");
   }
@@ -165,6 +172,19 @@ async function main() {
 
     // Load saved GitHub config first
     await loadGitHubConfigFromStorage();
+
+    // Handle Codegen event in Dev Mode (prevents timeout)
+    if (figma.editorType === "dev" && figma.codegen) {
+      figma.codegen.on("generate", () => {
+        return [
+          {
+            language: "CSS",
+            code: "/* Open the plugin UI to convert variables */",
+            title: "CSS Variables Converter",
+          },
+        ];
+      });
+    }
 
     // Show the UI (Dev Mode supports UI when launched as a normal plugin)
     figma.showUI(__html__, {
@@ -211,7 +231,12 @@ async function main() {
             data: { editorType: figma.editorType },
           });
           // Send saved GitHub config to UI
-          if (GITHUB_CONFIG.owner || GITHUB_CONFIG.repo || GITHUB_CONFIG.path || GITHUB_CONFIG.token) {
+          if (
+            GITHUB_CONFIG.owner ||
+            GITHUB_CONFIG.repo ||
+            GITHUB_CONFIG.path ||
+            GITHUB_CONFIG.token
+          ) {
             figma.ui.postMessage({
               type: "load-saved-config",
               data: {

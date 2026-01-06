@@ -4,6 +4,16 @@
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
+  "capabilities": [
+    "codegen",
+    "inspect"
+  ],
+  "codegenLanguages": [
+    {
+      "label": "CSS",
+      "value": "css"
+    }
+  ],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",
   "editorType": [

@@ -39,7 +39,7 @@ declare global {
 
   /** Variable alias reference */
   interface VariableAlias {
-    type: 'VARIABLE_ALIAS';
+    type: "VARIABLE_ALIAS";
     id: string;
   }
 
@@ -56,8 +56,8 @@ declare global {
     id: string;
     name: string;
     resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
-    valuesByMode: { 
-      [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias 
+    valuesByMode: {
+      [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias;
     };
     setVariableCodeSyntax(platform: string, syntax: string): void;
   }
@@ -72,6 +72,14 @@ declare global {
       preferences: {
         language: string;
       };
+      on(
+        event: "generate",
+        callback: (event: { node: unknown }) => Array<{
+          language: string;
+          code: string;
+          title: string;
+        }>
+      ): void;
     };
     ui: {
       postMessage(message: unknown): void;
@@ -95,11 +103,11 @@ declare global {
       }
     ): void;
     /** Editor type - 'figma' for design mode, 'dev' for dev mode */
-    editorType: 'figma' | 'dev';
+    editorType: "figma" | "dev";
     /** Command that triggered the plugin (from manifest menu) */
     command?: string;
     /** Current mode - undefined in normal run, 'codegen' in codegen mode */
-    mode?: 'codegen';
+    mode?: "codegen";
   };
 
   /** Global variable containing the UI HTML */
