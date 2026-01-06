@@ -9,14 +9,14 @@ const formatCETTimestamp = () => {
   const now = new Date();
   // Convert to CET (UTC+1) or CEST (UTC+2 during daylight saving)
   // Using UTC offset approximation since Intl is not available in Figma plugins
-  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const cetTime = new Date(utcTime + (3600000 * 1)); // CET is UTC+1
+  const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+  const cetTime = new Date(utcTime + 3600000 * 1); // CET is UTC+1
 
   const year = cetTime.getFullYear();
-  const month = String(cetTime.getMonth() + 1).padStart(2, '0');
-  const day = String(cetTime.getDate()).padStart(2, '0');
-  const hour = String(cetTime.getHours()).padStart(2, '0');
-  const minute = String(cetTime.getMinutes()).padStart(2, '0');
+  const month = String(cetTime.getMonth() + 1).padStart(2, "0");
+  const day = String(cetTime.getDate()).padStart(2, "0");
+  const hour = String(cetTime.getHours()).padStart(2, "0");
+  const minute = String(cetTime.getMinutes()).padStart(2, "0");
 
   const label = `${year}-${month}-${day} ${hour}:${minute} CET`;
   const slug = `${year}${month}${day}-${hour}${minute}`;
@@ -74,11 +74,13 @@ export async function pushCssThemesToGitHub(
     if (!baseSha) {
       throw new Error(
         `Failed to resolve base branch. Neither 'master' nor 'main' branch exists in your repository.\n\n` +
-        `Please check:\n` +
-        `1. Repository ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo} exists\n` +
-        `2. Your GitHub token has correct permissions (repo scope)\n` +
-        `3. At least one of these branches exists: ${baseBranchCandidates.join(", ")}\n\n` +
-        `If your default branch has a different name, please create either 'main' or 'master' branch first.`
+          `Please check:\n` +
+          `1. Repository ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo} exists\n` +
+          `2. Your GitHub token has correct permissions (repo scope)\n` +
+          `3. At least one of these branches exists: ${baseBranchCandidates.join(
+            ", "
+          )}\n\n` +
+          `If your default branch has a different name, please create either 'main' or 'master' branch first.`
       );
     }
 
@@ -97,7 +99,8 @@ export async function pushCssThemesToGitHub(
     let refCreated = false;
     let attempt = 0;
     while (!refCreated && attempt < 3) {
-      const branchName = attempt === 0 ? featureBranch : `${featureBranch}-${attempt}`;
+      const branchName =
+        attempt === 0 ? featureBranch : `${featureBranch}-${attempt}`;
       const createRefResponse = await fetch(createRefUrl, {
         method: "POST",
         headers: {
@@ -129,48 +132,50 @@ export async function pushCssThemesToGitHub(
         if (createRefResponse.status === 403) {
           throw new Error(
             `GitHub Access Denied (403 Forbidden)\n\n` +
-            `Your GitHub token doesn't have the required permissions.\n\n` +
-            `Please create a new Personal Access Token with these permissions:\n` +
-            `• repo (Full control of private repositories)\n` +
-            `• workflow (Update GitHub Action workflows)\n\n` +
-            `To create a token:\n` +
-            `1. Go to: https://github.com/settings/tokens/new\n` +
-            `2. Select scopes: 'repo' and 'workflow'\n` +
-            `3. Generate token and copy it\n` +
-            `4. Update your token in the Exporter tab\n\n` +
-            `Repository: ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
-            `API Response: ${body?.message || createRefResponse.statusText}`
+              `Your GitHub token doesn't have the required permissions.\n\n` +
+              `Please create a new Personal Access Token with these permissions:\n` +
+              `• repo (Full control of private repositories)\n` +
+              `• workflow (Update GitHub Action workflows)\n\n` +
+              `To create a token:\n` +
+              `1. Go to: https://github.com/settings/tokens/new\n` +
+              `2. Select scopes: 'repo' and 'workflow'\n` +
+              `3. Generate token and copy it\n` +
+              `4. Update your token in the Exporter tab\n\n` +
+              `Repository: ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
+              `API Response: ${body?.message || createRefResponse.statusText}`
           );
         }
 
         if (createRefResponse.status === 404) {
           throw new Error(
             `Repository Not Found (404)\n\n` +
-            `The repository '${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}' doesn't exist or you don't have access to it.\n\n` +
-            `Please verify:\n` +
-            `• Repository name is correct\n` +
-            `• Repository exists at: https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
-            `• Your GitHub token has access to this repository`
+              `The repository '${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}' doesn't exist or you don't have access to it.\n\n` +
+              `Please verify:\n` +
+              `• Repository name is correct\n` +
+              `• Repository exists at: https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}\n` +
+              `• Your GitHub token has access to this repository`
           );
         }
 
         if (createRefResponse.status === 401) {
           throw new Error(
             `Authentication Failed (401 Unauthorized)\n\n` +
-            `Your GitHub token is invalid or expired.\n\n` +
-            `Please create a new token at: https://github.com/settings/tokens/new`
+              `Your GitHub token is invalid or expired.\n\n` +
+              `Please create a new token at: https://github.com/settings/tokens/new`
           );
         }
 
         throw new Error(
           `Failed to create branch ${branchName}: ${createRefResponse.status} ${createRefResponse.statusText}\n` +
-          `${body?.message || ''}`
+            `${body?.message || ""}`
         );
       }
     }
 
     if (!refCreated) {
-      throw new Error(`Failed to create feature branch after multiple attempts`);
+      throw new Error(
+        `Failed to create feature branch after multiple attempts`
+      );
     }
     // Get the current commit to access its tree
     const commitUrl = `${GITHUB_API_BASE}/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/git/commits/${baseSha}`;
@@ -263,7 +268,7 @@ export async function pushCssThemesToGitHub(
       themeNames.length === 1
         ? themeNames[0]
         : `${themeNames.length} themes (${themeNames.join(", ")})`;
-    const commitMessage = `feat(figma-variables): New version of Figma variables was exported ${timestampLabel}\n\nExported themes: ${themesLabel}\nBase branch: ${baseBranch}`;
+    const commitMessage = `feat(figma-variables): Figma variables exported ${timestampLabel}\n\nExported themes: ${themesLabel}\nBase branch: ${baseBranch}`;
     const newCommitUrl = `${GITHUB_API_BASE}/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/git/commits`;
     const newCommitResponse = await fetch(newCommitUrl, {
       method: "POST",
