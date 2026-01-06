@@ -9,11 +9,55 @@ import { convertVariablesToCSS } from "./services/variable-conversion.service";
 import { exportToGitHub } from "./services/export.service";
 import { GITHUB_CONFIG } from "./config";
 
+// Storage key for GitHub config
+const GITHUB_CONFIG_STORAGE_KEY = "figma-tokens-github-config";
+
 // Global flag to prevent multiple executions
 let isRunning = false;
 
 // Cache for the last conversion result
 let lastConversionResult: ConversionResult | null = null;
+
+/**
+ * Load GitHub config from persistent storage
+ */
+async function loadGitHubConfigFromStorage(): Promise<void> {
+  try {
+    const storedConfig = await figma.clientStorage.getAsync(GITHUB_CONFIG_STORAGE_KEY) as {
+      owner?: string;
+      repo?: string;
+      path?: string;
+      token?: string;
+    } | undefined;
+
+    if (storedConfig) {
+      if (storedConfig.owner) GITHUB_CONFIG.owner = storedConfig.owner;
+      if (storedConfig.repo) GITHUB_CONFIG.repo = storedConfig.repo;
+      if (storedConfig.path) GITHUB_CONFIG.path = storedConfig.path;
+      if (storedConfig.token) GITHUB_CONFIG.token = storedConfig.token;
+      console.log("✅ Loaded GitHub config from storage");
+    }
+  } catch (error) {
+    console.warn("⚠️ Could not load GitHub config from storage:", error);
+  }
+}
+
+/**
+ * Save GitHub config to persistent storage
+ */
+async function saveGitHubConfigToStorage(): Promise<void> {
+  try {
+    await figma.clientStorage.setAsync(GITHUB_CONFIG_STORAGE_KEY, {
+      owner: GITHUB_CONFIG.owner,
+      repo: GITHUB_CONFIG.repo,
+      path: GITHUB_CONFIG.path,
+      token: GITHUB_CONFIG.token,
+    });
+    console.log("✅ Saved GitHub config to storage");
+  } catch (error) {
+    console.warn("⚠️ Could not save GitHub config to storage:", error);
+  }
+}
 
 /**
  * Loads all variable collections
@@ -113,12 +157,16 @@ async function handleExportToGitHub(): Promise<{ success: boolean; message: stri
 /**
  * Main plugin entry point
  */
-function main() {
+async function main() {
   try {
     console.log("🚀 Plugin starting...");
     console.log("📍 Editor type:", figma.editorType);
+    console.log("📍 Mode:", figma.mode || "normal");
 
-    // Show the UI
+    // Load saved GitHub config first
+    await loadGitHubConfigFromStorage();
+
+    // Show the UI (Dev Mode supports UI when launched as a normal plugin)
     figma.showUI(__html__, {
       width: 420,
       height: 700,
@@ -157,11 +205,23 @@ function main() {
       switch (type) {
         // UI Ready
         case "ui-ready":
-          // Send editor type when UI is ready
+          // Send editor type and saved config when UI is ready
           figma.ui.postMessage({
             type: "editor-type",
             data: { editorType: figma.editorType },
           });
+          // Send saved GitHub config to UI
+          if (GITHUB_CONFIG.owner || GITHUB_CONFIG.repo || GITHUB_CONFIG.path || GITHUB_CONFIG.token) {
+            figma.ui.postMessage({
+              type: "load-saved-config",
+              data: {
+                owner: GITHUB_CONFIG.owner,
+                repo: GITHUB_CONFIG.repo,
+                path: GITHUB_CONFIG.path,
+                token: GITHUB_CONFIG.token,
+              },
+            });
+          }
           break;
 
         // Collection Management
@@ -314,6 +374,9 @@ function main() {
             if (cfg.repo !== undefined) GITHUB_CONFIG.repo = cfg.repo;
             if (cfg.path !== undefined) GITHUB_CONFIG.path = cfg.path;
             if (cfg.token !== undefined) GITHUB_CONFIG.token = cfg.token;
+
+            // Save to persistent storage
+            await saveGitHubConfigToStorage();
           }
 
           figma.ui.postMessage({

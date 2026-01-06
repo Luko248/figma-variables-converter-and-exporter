@@ -77,6 +77,13 @@ declare global {
       postMessage(message: unknown): void;
       onmessage: ((message: unknown) => void) | null;
     };
+    /** Persistent client-side storage */
+    clientStorage: {
+      getAsync(key: string): Promise<unknown>;
+      setAsync(key: string, value: unknown): Promise<void>;
+      deleteAsync(key: string): Promise<void>;
+      keysAsync(): Promise<string[]>;
+    };
     notify(message: string, options?: { error?: boolean }): void;
     closePlugin(): void;
     showUI(
@@ -89,6 +96,10 @@ declare global {
     ): void;
     /** Editor type - 'figma' for design mode, 'dev' for dev mode */
     editorType: 'figma' | 'dev';
+    /** Command that triggered the plugin (from manifest menu) */
+    command?: string;
+    /** Current mode - undefined in normal run, 'codegen' in codegen mode */
+    mode?: 'codegen';
   };
 
   /** Global variable containing the UI HTML */

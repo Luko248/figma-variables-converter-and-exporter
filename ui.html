@@ -14,6 +14,7 @@
             --accent: #6bd9a5;
             --accent-strong: #55c48f;
             --accent-stronger: #3ea876;
+            --accent-text: #3ea876;
             --success-bg: #e8f7ed;
             --success-text: #0d5520;
             --success-border: #a7e5b8;
@@ -32,9 +33,10 @@
             --panel: #181b21;
             --panel-strong: #1f242c;
             --border: #2b303a;
-            --accent: #7fe7b7;
-            --accent-strong: #5fcd9c;
-            --accent-stronger: #4ab386;
+            --accent: #2d9d6a;
+            --accent-strong: #258a5b;
+            --accent-stronger: #1d704a;
+            --accent-text: #5fe0a0;
             --success-bg: #12301c;
             --success-text: #b4f1c7;
             --success-border: #2d5f3b;
@@ -112,7 +114,7 @@
 
         .icon-button:hover {
             border-color: var(--accent);
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         .icon-button:active {
@@ -169,14 +171,14 @@
 
         .tab.active {
             background: var(--bg);
-            color: var(--accent);
+            color: var(--accent-text);
             border-color: var(--accent);
-            box-shadow: 0 2px 8px rgba(107, 217, 165, 0.2);
+            box-shadow: 0 2px 8px rgba(45, 157, 106, 0.25);
         }
 
         .tab.active::before {
             background: var(--accent);
-            color: #0f2e1c;
+            color: #ffffff;
             border: 1px solid var(--accent-stronger);
         }
 
@@ -560,7 +562,7 @@
         }
 
         .tooltip:hover .tooltip-icon {
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         .tooltip-text {
@@ -605,7 +607,7 @@
         }
 
         .tooltip-text strong {
-            color: var(--accent);
+            color: var(--accent-text);
             display: block;
             margin-bottom: 4px;
         }
@@ -711,13 +713,13 @@
         <div id="converter" class="tab-panel">
             <div class="section">
                 <h2>
-                    <svg class="icon-svg" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M128.5 64C93.2 64 64.5 92.7 64.5 128L64.5 512C64.5 547.3 93.2 576 128.5 576L384.5 576C419.8 576 448.5 547.3 448.5 512L448.5 416L526.6 416L495.6 447C486.2 456.4 486.2 471.6 495.6 480.9C505 490.2 520.2 490.3 529.5 480.9L601.5 408.9C610.9 399.5 610.9 384.3 601.5 375L529.5 303C520.1 293.6 504.9 293.6 495.6 303C486.3 312.4 486.2 327.6 495.6 336.9L526.6 367.9L448.5 367.9L448.5 234.4C448.5 217.4 441.8 201.1 429.8 189.1L323.2 82.7C311.2 70.7 295 64 278 64L128.5 64zM390 240L296.5 240C283.2 240 272.5 229.3 272.5 216L272.5 122.5L390 240zM256.5 392C256.5 378.7 267.2 368 280.5 368L384.5 368L384.5 416L280.5 416C267.2 416 256.5 405.3 256.5 392z" fill="currentColor"/>
+                    <svg class="icon-svg" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.56.93a.34.34 0 00-.37.07l-1.41 1.42A8.07 8.07 0 008.06 0a8.1 8.1 0 00-7.73 5.88.34.34 0 00.33.43h2.17a.34.34 0 00.32-.22 5.46 5.46 0 014.02-3.38c.3-.05.6-.08.9-.08a5.44 5.44 0 013.78 1.62l-1.44 1.44a.34.34 0 00.24.58h4.8a.34.34 0 00.34-.34V1.12a.34.34 0 00-.21-.31zM15.34 9.58h-2.17a.34.34 0 00-.32.22 5.46 5.46 0 01-4.02 3.38c-.3.05-.6.08-.9.08a5.44 5.44 0 01-3.78-1.62l1.44-1.44a.34.34 0 00-.24-.58H.55a.34.34 0 00-.34.34v4.8c0 .14.08.26.21.31a.34.34 0 00.37-.07l1.42-1.42A8.07 8.07 0 008.06 16a8.1 8.1 0 007.73-5.88.34.34 0 00-.33-.42z" fill="currentColor"/>
                     </svg>
                     Convert Variables
                 </h2>
                 <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
-                    Updates Figma web devmode with CSS variable names
+                    Converts Figma variables to CSS custom properties. In Dev Mode CSS tab, you'll see <code style="background: var(--panel); padding: 2px 4px; border-radius: 3px;">var(--variableName)</code> instead of raw Figma values.
                 </p>
                 <div id="variables-count" class="variables-count hidden"></div>
             </div>
@@ -799,8 +801,8 @@
         <!-- Converter Actions -->
         <div id="action-converter" class="action-bar-content">
             <button id="convert-btn" class="button button-primary">
-                <svg class="icon-svg" viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128.5 64C93.2 64 64.5 92.7 64.5 128L64.5 512C64.5 547.3 93.2 576 128.5 576L384.5 576C419.8 576 448.5 547.3 448.5 512L448.5 416L526.6 416L495.6 447C486.2 456.4 486.2 471.6 495.6 480.9C505 490.2 520.2 490.3 529.5 480.9L601.5 408.9C610.9 399.5 610.9 384.3 601.5 375L529.5 303C520.1 293.6 504.9 293.6 495.6 303C486.3 312.4 486.2 327.6 495.6 336.9L526.6 367.9L448.5 367.9L448.5 234.4C448.5 217.4 441.8 201.1 429.8 189.1L323.2 82.7C311.2 70.7 295 64 278 64L128.5 64zM390 240L296.5 240C283.2 240 272.5 229.3 272.5 216L272.5 122.5L390 240zM256.5 392C256.5 378.7 267.2 368 280.5 368L384.5 368L384.5 416L280.5 416C267.2 416 256.5 405.3 256.5 392z" fill="currentColor"/>
+                <svg class="icon-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.56.93a.34.34 0 00-.37.07l-1.41 1.42A8.07 8.07 0 008.06 0a8.1 8.1 0 00-7.73 5.88.34.34 0 00.33.43h2.17a.34.34 0 00.32-.22 5.46 5.46 0 014.02-3.38c.3-.05.6-.08.9-.08a5.44 5.44 0 013.78 1.62l-1.44 1.44a.34.34 0 00.24.58h4.8a.34.34 0 00.34-.34V1.12a.34.34 0 00-.21-.31zM15.34 9.58h-2.17a.34.34 0 00-.32.22 5.46 5.46 0 01-4.02 3.38c-.3.05-.6.08-.9.08a5.44 5.44 0 01-3.78-1.62l1.44-1.44a.34.34 0 00-.24-.58H.55a.34.34 0 00-.34.34v4.8c0 .14.08.26.21.31a.34.34 0 00.37-.07l1.42-1.42A8.07 8.07 0 008.06 16a8.1 8.1 0 007.73-5.88.34.34 0 00-.33-.42z" fill="currentColor"/>
                 </svg>
                 Convert Variables to Dev Format
             </button>
@@ -923,13 +925,13 @@
         prefersDark.addEventListener('change', handleSystemThemeChange);
         applyTheme(resolveInitialTheme());
 
-        // Load and apply stored GitHub config, then send to plugin
+        // GitHub config will be loaded from plugin storage when it sends 'load-saved-config' message
+        // localStorage is kept as a backup but plugin storage is the source of truth
         githubConfig = loadStoredGithubConfig();
-        applyGithubConfigToInputs(githubConfig);
         if (githubConfig) {
-          sendGithubConfigToPlugin(githubConfig);
-          configStatus.classList.remove('hidden');
-          configStatus.textContent = 'Loaded saved GitHub settings.';
+          applyGithubConfigToInputs(githubConfig);
+          // Don't send to plugin here - let plugin send its stored config first
+          console.log('📦 Found localStorage backup config (will be overwritten by plugin storage if available)');
         }
 
         saveConfigBtn.addEventListener('click', () => {
@@ -1025,7 +1027,7 @@
 
         function resetButtonContent(button) {
             const buttonConfigs = {
-                'convert-btn': '<svg class="icon-svg" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 8C14 8 12.5 10.5 8 10.5C3.5 10.5 2 8 2 8C2 8 3.5 5.5 8 5.5C12.5 5.5 14 8 14 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 2L14 14M4 13L3 14M12 13L13 14M12 3L13 2M4 3L3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/></svg> Convert Variables to Dev Format',
+                'convert-btn': '<svg class="icon-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M15.56.93a.34.34 0 00-.37.07l-1.41 1.42A8.07 8.07 0 008.06 0a8.1 8.1 0 00-7.73 5.88.34.34 0 00.33.43h2.17a.34.34 0 00.32-.22 5.46 5.46 0 014.02-3.38c.3-.05.6-.08.9-.08a5.44 5.44 0 013.78 1.62l-1.44 1.44a.34.34 0 00.24.58h4.8a.34.34 0 00.34-.34V1.12a.34.34 0 00-.21-.31zM15.34 9.58h-2.17a.34.34 0 00-.32.22 5.46 5.46 0 01-4.02 3.38c-.3.05-.6.08-.9.08a5.44 5.44 0 01-3.78-1.62l1.44-1.44a.34.34 0 00-.24-.58H.55a.34.34 0 00-.34.34v4.8c0 .14.08.26.21.31a.34.34 0 00.37-.07l1.42-1.42A8.07 8.07 0 008.06 16a8.1 8.1 0 007.73-5.88.34.34 0 00-.33-.42z" fill="currentColor"/></svg> Convert Variables to Dev Format',
                 'export-btn': '<svg class="icon-svg" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1V10M8 10L11 7M8 10L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10V14C14 14.5523 13.5523 15 13 15H3C2.44772 15 2 14.5523 2 14V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Export CSS to GitHub'
             };
             button.innerHTML = buttonConfigs[button.id] || button.innerHTML;
@@ -1284,6 +1286,19 @@
                 // Editor Type Configuration
                 case 'editor-type':
                     configureUIForEditorType(data.editorType);
+                    break;
+
+                // Load saved config from plugin storage
+                case 'load-saved-config':
+                    if (data) {
+                        ghOwnerInput.value = data.owner || '';
+                        ghRepoInput.value = data.repo || '';
+                        ghPathInput.value = data.path || '';
+                        ghTokenInput.value = data.token || '';
+                        configStatus.classList.remove('hidden');
+                        configStatus.textContent = 'Loaded saved GitHub settings.';
+                        console.log('✅ Loaded saved config from plugin storage');
+                    }
                     break;
 
                 // Design Tokens Messages

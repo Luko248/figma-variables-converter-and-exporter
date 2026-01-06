@@ -1,6 +1,7 @@
 # Project Architecture
 
 ## Overview
+
 The Figma CSS Variables Converter has been refactored into a clean, service-based architecture for better maintainability and readability.
 
 ## Directory Structure
@@ -40,25 +41,31 @@ src/
 ## Architecture Layers
 
 ### 1. **Constants** (`constants/`)
+
 Pure constants and configuration values with no dependencies.
 
 **Files:**
+
 - `token-patterns.ts` - Keyword arrays for detecting token types (colors, measures, fonts, shadows, gradients)
 - `conversion.constants.ts` - Numeric constants (batch sizes, fallback values, limits)
 
 ### 2. **Helpers** (`helpers/`)
+
 Pure utility functions with no side effects. Single responsibility principle.
 
 **Files:**
+
 - `cache.helper.ts` - Caching utilities and object pooling for performance
 - `color.helper.ts` - Color conversion functions (RGB/RGBA to OKLCH)
 - `numeric.helper.ts` - Numeric operations (px to rem, clamping, rounding)
 - `string.helper.ts` - String manipulation (camelCase with number preservation, sanitization, base64)
 
 ### 3. **Services** (`services/`)
+
 Business logic and orchestration. Services can depend on helpers and other services.
 
 **Files:**
+
 - `variable-type-detector.service.ts` - Detects variable category from name
 - `variable-naming.service.ts` - Generates CSS variable names
 - `value-converter.service.ts` - Safe conversion with error handling
@@ -68,15 +75,18 @@ Business logic and orchestration. Services can depend on helpers and other servi
 - `export.service.ts` - Orchestrates GitHub export (uses UI-provided config)
 
 ### 4. **Types** (`types/`)
+
 TypeScript type definitions organized by domain.
 
 **Files:**
+
 - `figma.types.ts` - Figma API global type declarations
 - `variable.types.ts` - Variable, conversion result, and CSS output types
 - `github.types.ts` - GitHub API request/response types
 - `index.ts` - Central export point for all types
 
 ### 5. **Integration** (Root level)
+
 - `github-service.ts` - GitHub API integration (creates commits, pushes files)
 - `config.ts` - Runtime configuration (updated via UI messages, no file loading)
 - `main.ts` - Plugin entry point and UI message handling
@@ -85,7 +95,9 @@ TypeScript type definitions organized by domain.
 ## Naming Conventions
 
 ### Token Types (CSS Variables)
+
 Variables are named in camelCase matching their Figma names, with numbers preserved:
+
 - **color**: `--primary`, `--btnBackground`
 - **measures**: `--spacing8`, `--spacing16`, `--borderRadius`
 - **fonts**: `--weightBold`, `--familyBase`, `--size16`
@@ -118,9 +130,10 @@ Variables are named in camelCase matching their Figma names, with numbers preser
 **Configuration**: No build-time config injection. All GitHub settings are configured by users in the UI and stored in localStorage.
 
 ## Export Branching Strategy
+
 - Base fetched from `master` (fallback to configured branch or `main`).
 - Creates a feature branch per export: `feat/figma-variables-<timestampCET>`.
-- Commit message: `feat(figma-variables): New version of Figma variables was exported <timestamp CET>`.
+- Commit message: `feat(figma-variables): Figma variables exported <timestamp CET>`.
 - Each theme is written as `variables.css` inside a theme-named folder (kebab-case, lowercased).
 
 ## Benefits of This Architecture

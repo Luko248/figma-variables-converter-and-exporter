@@ -30,6 +30,7 @@ npm run clean
 The build process has two steps:
 
 1. **Main build** (esbuild): Bundles TypeScript into a single `code.js` file using:
+
    - Entry: `src/main.ts`
    - Target: ES2017 (Figma runtime compatibility)
    - Format: IIFE (Immediately Invoked Function Expression)
@@ -39,6 +40,8 @@ The build process has two steps:
    - Strips `__dirname` references
    - Removes `module.exports`
    - Adds global stubs for `module` and `exports`
+
+**Note**: The `watch` command skips the post-build step. Run `npm run build` before final testing in Figma.
 
 ## Architecture
 
@@ -53,16 +56,19 @@ constants/ → helpers/ → services/ → main.ts
 ### Layer Responsibilities
 
 **Constants** (`constants/`): Pure configuration values
+
 - `token-patterns.ts`: Keywords for detecting token types (colors, fonts, measures)
 - `conversion.constants.ts`: Batch sizes, fallback values, limits
 
 **Helpers** (`helpers/`): Pure utility functions with no side effects
+
 - `cache.helper.ts`: Object pooling and memoization for performance
 - `color.helper.ts`: RGB/RGBA to HSL conversion
 - `numeric.helper.ts`: Pixel-to-rem conversion, rounding, clamping
 - `string.helper.ts`: camelCase/kebab-case conversion, base64 encoding
 
 **Services** (`services/`): Business logic and orchestration
+
 - `variable-conversion.service.ts`: Main orchestrator for conversion process
 - `export.service.ts`: GitHub export orchestration
 - `css-builder.service.ts`: Generates `:root { ... }` blocks
@@ -71,10 +77,12 @@ constants/ → helpers/ → services/ → main.ts
 - `variable-naming.service.ts`: Generates CSS variable names
 - `value-converter.service.ts`: Safe type conversion with fallbacks
 
-**Integration**: Root-level files for external systems
+**Integration** (`src/` root level): External system interfaces
+
 - `github-service.ts`: GitHub API integration (branches, commits, file uploads)
-- `main.ts`: Plugin entry point, UI message routing
-- `ui.html`: Single-file UI with tabs and local storage for GitHub settings
+- `main.ts`: Plugin entry point, handles `figma.ui.onmessage` routing
+- `ui.html`: Single-file UI with tabs, communicates via `parent.postMessage`
+- `config.ts`: Runtime config object updated via UI messages (never hardcode credentials)
 
 ### Dependency Rules
 
@@ -122,6 +130,7 @@ CSS output groups variables in this order: Colors → Fonts → Measures
 **Theme Detection**: Automatically detected from Figma variable collection modes
 
 **File Organization**: Each theme generates its own folder:
+
 ```
 {folder-path}/
   ├── dark/
@@ -133,6 +142,7 @@ CSS output groups variables in this order: Colors → Fonts → Measures
 ```
 
 **Theme Naming**:
+
 - Converted to kebab-case
 - `-light` suffix is removed for cleaner base theme
 - Example: "Light Mode" → `light/`, "Dark Mode" → `dark/`
@@ -140,12 +150,14 @@ CSS output groups variables in this order: Colors → Fonts → Measures
 ## GitHub Export Flow
 
 **Branching Strategy**:
+
 1. Fetches base from `master` (fallback to `main`)
 2. Creates feature branch: `feat/figma-variables-YYYYMMDD-HHMM` (CET timezone)
 3. Commits all theme CSS files in a single commit
-4. Commit message: `feat(figma-variables): New version of Figma variables was exported <timestamp CET>`
+4. Commit message: `feat(figma-variables): Figma variables exported <timestamp CET>`
 
 **File Structure**:
+
 - One commit contains all themes
 - Each theme goes in its own folder
 - File name is always `variables.css`
@@ -177,6 +189,7 @@ Generated CSS follows this structure:
 ```
 
 **Key Format Rules**:
+
 - **Colors**: Modern OKLCH syntax with space-separated values (better perceptual uniformity than HSL)
 - **Alpha channel**: `/ 0.5` suffix format
 - **Sizing**: Rem-based (16px base)
@@ -184,15 +197,23 @@ Generated CSS follows this structure:
 - **Organization**: Alphabetically sorted within each section
 - **Header**: ISO timestamp in comment
 
+## UI ↔ Plugin Communication
+
+The plugin uses Figma's message-passing API:
+
+- **UI → Plugin**: `parent.postMessage({ pluginMessage: { type, ... } }, '*')`
+- **Plugin → UI**: `figma.ui.postMessage({ type, data })`
+
+Key message types: `convert-variables`, `export-github`, `update-config`, `load-collections`
+
 ## Configuration
 
-**Manual UI Configuration**: GitHub settings (owner, repo, path, token) are configured by users directly in the plugin UI:
-- Users enter their GitHub credentials in the **Exporter** tab (Step 3)
-- Settings are stored in the browser's localStorage
-- Configuration is sent to the plugin at runtime via `update-config` messages
-- No configuration files or build-time injection needed
+GitHub settings (owner, repo, path, token) are configured by users in the plugin UI:
 
-**Runtime Config** (`src/config.ts`): Exports empty default values that get populated when users save their settings in the UI. Never hardcode credentials in this file.
+- Users enter credentials in the **Exporter** tab
+- Settings are stored in browser localStorage
+- Sent to plugin at runtime via `update-config` messages
+- `GITHUB_CONFIG` object in `config.ts` is mutated at runtime (never commit credentials)
 
 ## Performance Considerations
 

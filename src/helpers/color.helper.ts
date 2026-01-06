@@ -176,8 +176,8 @@ export const convertColorToOklch = (colorValue: RGB | RGBA): string => {
 
     const color = new Colorizr({ r, g, b, alpha });
 
-    // Get OKLCH values from Colorizr
-    const oklchValues = color.oklch();
+    // Get OKLCH values from Colorizr (oklch is a property, not a method)
+    const oklchValues = color.oklch;
     const l = formatOklchNumber(oklchValues.l);
     const c = formatOklchNumber(oklchValues.c);
     const h = formatOklchNumber(oklchValues.h);
