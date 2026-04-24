@@ -12,6 +12,8 @@ export type {
   VariablesByTheme,
   ConversionResult,
   ThemeCssOutput,
+  ExportFormat,
+  ExportOptions,
   VariableCategory,
 } from "./variable.types";
 

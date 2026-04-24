@@ -491,6 +491,93 @@
             border-color: var(--accent);
         }
 
+        .switch-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--panel-strong);
+        }
+
+        .switch-copy {
+            min-width: 0;
+        }
+
+        .switch-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .switch-hint {
+            display: block;
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-flex;
+            width: 38px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+            background: var(--border);
+            border-radius: 999px;
+            transition: background 0.2s ease;
+        }
+
+        .switch-slider::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 2px;
+            top: 2px;
+            border-radius: 50%;
+            background: var(--panel-strong);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .switch input:checked + .switch-slider {
+            background: var(--accent);
+        }
+
+        .switch input:checked + .switch-slider::before {
+            transform: translateX(16px);
+        }
+
+        .switch input:focus-visible + .switch-slider {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        [data-theme="dark"] .switch-slider {
+            background: #3a404c;
+        }
+
+        [data-theme="dark"] .switch-slider::before {
+            background: #d4dbe6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
         .color-input {
             width: 60px;
             height: 32px;
@@ -729,6 +816,29 @@
         <div id="exporter" class="tab-panel">
             <div class="section">
                 <h2>
+                    <svg class="icon-svg" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" fill="currentColor"/>
+                    </svg>
+                    Tailwind Theme
+                </h2>
+                <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
+                    Export as a Tailwind v4 <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">@theme</code> block in <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">theme.css</code> instead of plain CSS custom properties.
+                </p>
+
+                <div class="switch-row">
+                    <div class="switch-copy">
+                        <label class="switch-label" for="tailwind-theme-toggle">Export as Tailwind theme</label>
+                        <span class="switch-hint">Writes Tailwind v4 @theme tokens to theme.css</span>
+                    </div>
+                    <label class="switch" aria-label="Export as Tailwind theme">
+                        <input id="tailwind-theme-toggle" type="checkbox" />
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>
                     <svg class="icon-svg" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M357.728 949.888c30.976 0 39.744-12.128 39.744-27.616s0-49.184-0.672-97.024c-160.992 34.368-195.36-76.8-195.36-76.8-26.272-65.344-64.672-83.552-64.672-83.552-52.544-35.040 4.032-34.368 4.032-34.368 57.952 4.032 88.928 58.624 88.928 58.624 51.872 87.584 135.424 62.016 168.416 47.168 2.688-28.96 15.488-56.576 37.056-76.8-128.672-14.144-264.096-63.328-264.096-281.6-0.672-56.576 20.896-111.84 59.968-152.928-6.752-14.144-26.272-72.096 4.704-150.912 0 0 48.512-15.488 159.648 58.624 94.976-25.6 194.688-25.6 289.696 0 109.824-73.44 158.976-58.624 158.976-58.624 30.976 78.144 11.456 136.096 6.048 150.912 39.072 41.088 59.968 96.352 59.296 152.928 0 218.944-135.424 266.784-264.768 280.928 20.224 16.832 39.072 51.872 39.072 105.088 0 76.8-0.672 137.44-0.672 155.616 0 14.816 6.752 26.944 39.744 26.944z" fill="currentColor"/>
                     </svg>
@@ -850,6 +960,7 @@
         const ghTokenInput = document.getElementById('gh-token');
         const saveConfigBtn = document.getElementById('save-config-btn');
         const configStatus = document.getElementById('config-status');
+        const tailwindThemeToggle = document.getElementById('tailwind-theme-toggle');
         
         // Theme management
         const THEME_STORAGE_KEY = 'figma-tokens-theme';
@@ -1026,12 +1137,21 @@
         }
 
         function resetButtonContent(button) {
+            const exportLabel = tailwindThemeToggle && tailwindThemeToggle.checked
+                ? 'Export Tailwind Theme to GitHub'
+                : 'Export CSS to GitHub';
             const buttonConfigs = {
                 'convert-btn': '<svg class="icon-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M15.56.93a.34.34 0 00-.37.07l-1.41 1.42A8.07 8.07 0 008.06 0a8.1 8.1 0 00-7.73 5.88.34.34 0 00.33.43h2.17a.34.34 0 00.32-.22 5.46 5.46 0 014.02-3.38c.3-.05.6-.08.9-.08a5.44 5.44 0 013.78 1.62l-1.44 1.44a.34.34 0 00.24.58h4.8a.34.34 0 00.34-.34V1.12a.34.34 0 00-.21-.31zM15.34 9.58h-2.17a.34.34 0 00-.32.22 5.46 5.46 0 01-4.02 3.38c-.3.05-.6.08-.9.08a5.44 5.44 0 01-3.78-1.62l1.44-1.44a.34.34 0 00-.24-.58H.55a.34.34 0 00-.34.34v4.8c0 .14.08.26.21.31a.34.34 0 00.37-.07l1.42-1.42A8.07 8.07 0 008.06 16a8.1 8.1 0 007.73-5.88.34.34 0 00-.33-.42z" fill="currentColor"/></svg> Convert Variables to Dev Format',
-                'export-btn': '<svg class="icon-svg" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1V10M8 10L11 7M8 10L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10V14C14 14.5523 13.5523 15 13 15H3C2.44772 15 2 14.5523 2 14V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Export CSS to GitHub'
+                'export-btn': `<svg class="icon-svg" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1V10M8 10L11 7M8 10L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10V14C14 14.5523 13.5523 15 13 15H3C2.44772 15 2 14.5523 2 14V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ${exportLabel}`
             };
             button.innerHTML = buttonConfigs[button.id] || button.innerHTML;
         }
+
+        tailwindThemeToggle.addEventListener('change', () => {
+            if (!exportBtn.disabled) {
+                resetButtonContent(exportBtn);
+            }
+        });
 
         // Tab Management
         function switchTab(targetTab) {
@@ -1213,10 +1333,15 @@
             setButtonLoading(exportBtn, true, 'Exporting...');
 
             try {
+                const exportOptions = {
+                    format: tailwindThemeToggle.checked ? 'tailwind-theme' : 'css-variables'
+                };
+
                 parent.postMessage({ 
                     pluginMessage: { 
                         type: 'export-github',
-                        variables: convertedVariables
+                        variables: convertedVariables,
+                        exportOptions: exportOptions
                     } 
                 }, '*');
             } catch (error) {

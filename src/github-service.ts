@@ -30,11 +30,14 @@ const formatCETTimestamp = () => {
  * @returns Result object with success status and details
  */
 export async function pushCssThemesToGitHub(
-  themeFiles: ThemeCssOutput
+  themeFiles: ThemeCssOutput,
+  options: { fileName?: string; formatLabel?: string } = {}
 ): Promise<GitHubApiResponse> {
   try {
     console.log("🚀 Starting CSS theme push...");
     const themeNames = Object.keys(themeFiles);
+    const fileName = options.fileName || "variables.css";
+    const formatLabel = options.formatLabel || "CSS variables";
     console.log(`📦 Pushing ${themeNames.length} theme(s):`, themeNames);
 
     if (themeNames.length === 0) {
@@ -222,18 +225,18 @@ export async function pushCssThemesToGitHub(
 
       if (!blobResponse.ok) {
         throw new Error(
-          `Failed to create blob for ${themeName}.css: ${blobResponse.status}`
+          `Failed to create blob for ${themeName}/${fileName}: ${blobResponse.status}`
         );
       }
 
       const blobData = (await blobResponse.json()) as { sha: string };
       treeItems.push({
-        path: `${GITHUB_CONFIG.path}/${themeName}/variables.css`,
+        path: `${GITHUB_CONFIG.path}/${themeName}/${fileName}`,
         mode: "100644",
         type: "blob",
         sha: blobData.sha,
       });
-      console.log(`✅ Blob created for ${themeName}.css`);
+      console.log(`✅ Blob created for ${themeName}/${fileName}`);
     }
 
     // Create a new tree with all the file changes
@@ -268,7 +271,7 @@ export async function pushCssThemesToGitHub(
       themeNames.length === 1
         ? themeNames[0]
         : `${themeNames.length} themes (${themeNames.join(", ")})`;
-    const commitMessage = `feat(figma-variables): Figma variables exported ${timestampLabel}\n\nExported themes: ${themesLabel}\nBase branch: ${baseBranch}`;
+    const commitMessage = `feat(figma-variables): Figma variables exported ${timestampLabel}\n\nFormat: ${formatLabel}\nExported themes: ${themesLabel}\nBase branch: ${baseBranch}`;
     const newCommitUrl = `${GITHUB_API_BASE}/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/git/commits`;
     const newCommitResponse = await fetch(newCommitUrl, {
       method: "POST",
@@ -323,7 +326,7 @@ export async function pushCssThemesToGitHub(
 
     return {
       success: true,
-      message: `Successfully pushed ${themeNames.length} CSS theme file(s) to ${featureBranch} in a single commit`,
+      message: `Successfully pushed ${themeNames.length} ${formatLabel} file(s) to ${featureBranch} in a single commit`,
       sha: newCommitSha,
     };
   } catch (error) {

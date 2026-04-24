@@ -4,7 +4,7 @@
  */
 
 import "./types/figma.types";
-import { ConversionResult } from "./types/index";
+import { ConversionResult, ExportOptions } from "./types/index";
 import { convertVariablesToCSS } from "./services/variable-conversion.service";
 import { exportToGitHub } from "./services/export.service";
 import { GITHUB_CONFIG } from "./config";
@@ -156,7 +156,9 @@ async function handleConvertVariables(): Promise<ConversionResult> {
 /**
  * Wrapper for export with cached result
  */
-async function handleExportToGitHub(): Promise<{
+async function handleExportToGitHub(
+  options: ExportOptions = { format: "css-variables" }
+): Promise<{
   success: boolean;
   message: string;
 }> {
@@ -164,7 +166,7 @@ async function handleExportToGitHub(): Promise<{
     throw new Error("No variables to export. Please convert variables first.");
   }
 
-  return await exportToGitHub(lastConversionResult);
+  return await exportToGitHub(lastConversionResult, options);
 }
 
 /**
@@ -223,6 +225,7 @@ async function main() {
         path?: string;
         token?: string;
       };
+      exportOptions?: ExportOptions;
     };
 
     const { type, collectionId } = message;
@@ -374,7 +377,9 @@ async function main() {
           console.log("📥 Received export-github message");
 
           try {
-            const result = await handleExportToGitHub();
+            const result = await handleExportToGitHub(
+              message.exportOptions || { format: "css-variables" }
+            );
             if (result.success) {
               figma.ui.postMessage({
                 type: "export-success",

@@ -66,7 +66,7 @@ declare global {
   const figma: {
     variables: {
       getLocalVariableCollectionsAsync(): Promise<VariableCollection[]>;
-      getVariableByIdAsync(id: string): Promise<Variable>;
+      getVariableByIdAsync(id: string): Promise<Variable | null>;
     };
     codegen: {
       preferences: {

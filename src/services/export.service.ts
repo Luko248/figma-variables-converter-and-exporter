@@ -2,8 +2,12 @@
  * Export orchestration service
  */
 
-import { ConversionResult } from "../types/index";
-import { buildCssOutput, buildThemeAwareCssOutput } from "./css-builder.service";
+import { ConversionResult, ExportOptions } from "../types/index";
+import {
+  buildCssOutput,
+  buildTailwindThemeOutput,
+  buildThemeAwareCssOutput,
+} from "./css-builder.service";
 import { pushCssThemesToGitHub } from "../github-service";
 import { GITHUB_CONFIG } from "../config";
 
@@ -25,12 +29,17 @@ function assertGitHubConfig(): void {
  * Exports CSS variables to GitHub repository
  */
 export async function exportToGitHub(
-  data: ConversionResult
+  data: ConversionResult,
+  options: ExportOptions = { format: "css-variables" }
 ): Promise<{ success: boolean; message: string }> {
   try {
     assertGitHubConfig();
+    const isTailwindTheme = options.format === "tailwind-theme";
+    const fileName = isTailwindTheme ? "theme.css" : "variables.css";
+    const formatLabel = isTailwindTheme ? "Tailwind theme" : "CSS variables";
 
     console.log("🚀 Starting GitHub export...");
+    console.log("   export format:", options.format);
     console.log("📊 Export data received:");
     console.log(
       "   data.variables:",
@@ -46,20 +55,26 @@ export async function exportToGitHub(
     if (data.variablesByTheme && data.themes && data.themes.length > 0) {
       console.log("✅ Multi-theme mode activated!");
       console.log("   Themes to export:", data.themes);
-      const themeOutput = buildThemeAwareCssOutput(data.variablesByTheme);
+      const themeOutput = buildThemeAwareCssOutput(
+        data.variablesByTheme,
+        options.format
+      );
       console.log("🎨 Theme-aware CSS files generated:", Object.keys(themeOutput));
 
       const totalThemes = Object.keys(themeOutput).length;
       const totalVariables = data.variables?.length || 0;
 
       console.log(`📤 Pushing ${totalThemes} theme(s) in a single commit...`);
-      const githubResult = await pushCssThemesToGitHub(themeOutput);
+      const githubResult = await pushCssThemesToGitHub(themeOutput, {
+        fileName,
+        formatLabel,
+      });
 
       if (githubResult.success) {
         console.log(`✅ All themes pushed successfully in one commit`);
         return {
           success: true,
-          message: `Successfully exported ${totalVariables} variables across ${totalThemes} theme(s) in a single commit`,
+          message: `Successfully exported ${totalVariables} variables as ${formatLabel} across ${totalThemes} theme(s) in a single commit`,
         };
       } else {
         console.error(`❌ Failed to push themes:`, githubResult.message);
@@ -71,8 +86,13 @@ export async function exportToGitHub(
     } else {
       // Fallback to single theme export
       console.log("⚠️ FALLING BACK TO SINGLE THEME MODE!");
-      const cssOutput = buildCssOutput(data.variables);
-      const githubResult = await pushCssThemesToGitHub({ theme: cssOutput });
+      const cssOutput = isTailwindTheme
+        ? buildTailwindThemeOutput(data.variables)
+        : buildCssOutput(data.variables);
+      const githubResult = await pushCssThemesToGitHub(
+        { theme: cssOutput },
+        { fileName, formatLabel }
+      );
 
       const totalVariables = data.variables?.length || 0;
 
@@ -80,7 +100,7 @@ export async function exportToGitHub(
         console.log("✅ GitHub push successful:", githubResult.message);
         return {
           success: true,
-          message: `Successfully exported ${totalVariables} variables`,
+          message: `Successfully exported ${totalVariables} variables as ${formatLabel}`,
         };
       } else {
         console.error("❌ GitHub push failed:", githubResult.message);

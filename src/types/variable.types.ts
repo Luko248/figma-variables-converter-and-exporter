@@ -32,5 +32,13 @@ export interface ThemeCssOutput {
   [themeName: string]: string;
 }
 
+/** Supported export formats */
+export type ExportFormat = "css-variables" | "tailwind-theme";
+
+/** Options that affect exported file content */
+export interface ExportOptions {
+  format: ExportFormat;
+}
+
 /** Variable type categories */
 export type VariableCategory = "color" | "measures" | "fonts";

@@ -28,7 +28,7 @@ async function processBatchOfVariables(
 ): Promise<void> {
   const promises = variableIds.map(async (variableId) => {
     try {
-      const variable: Variable = await figma.variables.getVariableByIdAsync(
+      const variable = await figma.variables.getVariableByIdAsync(
         variableId
       );
 
