@@ -15,6 +15,12 @@ const GITHUB_CONFIG_STORAGE_KEY = "figma-tokens-github-config";
 // Global flag to prevent multiple executions
 let isRunning = false;
 
+function createErrorWithCause(message: string, cause: unknown): Error {
+  const error = new Error(message);
+  (error as Error & { cause: unknown }).cause = cause;
+  return error;
+}
+
 // Cache for the last conversion result
 let lastConversionResult: ConversionResult | null = null;
 
@@ -82,7 +88,7 @@ async function loadCollections(): Promise<{
     return { collections: collectionsData };
   } catch (error) {
     console.error("Error loading collections:", error);
-    throw new Error("Failed to load collections");
+    throw createErrorWithCause("Failed to load collections", error);
   }
 }
 
@@ -123,7 +129,7 @@ async function loadVariables(collectionId: string): Promise<{
     return { variables };
   } catch (error) {
     console.error("Error loading variables:", error);
-    throw new Error("Failed to load variables");
+    throw createErrorWithCause("Failed to load variables", error);
   }
 }
 

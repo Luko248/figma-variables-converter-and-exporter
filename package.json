@@ -6,44 +6,23 @@
   "scripts": {
     "build": "npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser && node fix-figma-compat.js",
     "clean": "rm -f code.js && rm -rf dist",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "watch": "npx esbuild src/main.ts --bundle --outfile=code.js --target=es2017 --format=iife --platform=browser --watch"
   },
   "author": "Lukas Chylik",
   "license": "MIT",
   "devDependencies": {
-    "@figma/eslint-plugin-figma-plugins": "*",
-    "@figma/plugin-typings": "*",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
-    "@vercel/ncc": "^0.38.3",
-    "eslint": "^8.54.0",
-    "typescript": "^5.3.2"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@figma/figma-plugins/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    },
-    "root": true,
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_"
-        }
-      ]
-    }
+    "@figma/eslint-plugin-figma-plugins": "^1.0.0",
+    "@eslint/js": "^10.0.1",
+    "@figma/plugin-typings": "^1.125.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "@vercel/ncc": "^0.38.4",
+    "eslint": "^10.2.1",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "colorizr": "^3.0.8"
+    "colorizr": "^5.0.1"
   }
 }
