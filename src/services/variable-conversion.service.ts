@@ -48,7 +48,12 @@ async function processBatchOfVariables(
 
       for (const modeId of variableModes) {
         const modeName = allModes[modeId] || "default";
-        const cssValue = await generateCSSValue(variable, modeId, collection.name);
+        const cssValue = await generateCSSValue(
+          variable,
+          modeId,
+          collection.name,
+          modeName
+        );
 
         if (cssValue) {
           if (!variablesByTheme[modeName]) {

@@ -55,6 +55,7 @@ declare global {
   interface Variable {
     id: string;
     name: string;
+    variableCollectionId: string;
     resolvedType: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
     valuesByMode: {
       [modeId: string]: RGB | RGBA | number | string | boolean | VariableAlias;
@@ -67,6 +68,9 @@ declare global {
     variables: {
       getLocalVariableCollectionsAsync(): Promise<VariableCollection[]>;
       getVariableByIdAsync(id: string): Promise<Variable | null>;
+      getVariableCollectionByIdAsync(
+        id: string
+      ): Promise<VariableCollection | null>;
     };
     codegen: {
       preferences: {

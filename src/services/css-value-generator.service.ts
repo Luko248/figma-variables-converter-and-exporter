@@ -17,7 +17,8 @@ import { FALLBACK_OKLCH_COLOR } from "../constants/conversion.constants";
 const convertColorValue = async (
   variable: Variable,
   modeId?: string,
-  collectionName: string = ""
+  collectionName: string = "",
+  modeName?: string
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -41,7 +42,8 @@ const convertColorValue = async (
       const resolvedValue = await resolveAliasToRawValue(
         aliasedVariable,
         targetModeId,
-        collectionName
+        collectionName,
+        modeName
       );
       if (resolvedValue) {
         console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
@@ -72,7 +74,8 @@ const convertColorValue = async (
 const convertFloatValue = async (
   variable: Variable,
   modeId?: string,
-  collectionName: string = ""
+  collectionName: string = "",
+  modeName?: string
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -91,7 +94,8 @@ const convertFloatValue = async (
       const resolvedValue = await resolveAliasToRawValue(
         aliasedVariable,
         targetModeId,
-        collectionName
+        collectionName,
+        modeName
       );
       if (resolvedValue) {
         console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
@@ -122,7 +126,8 @@ const convertFloatValue = async (
 const convertStringValue = async (
   variable: Variable,
   modeId?: string,
-  collectionName: string = ""
+  collectionName: string = "",
+  modeName?: string
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -141,7 +146,8 @@ const convertStringValue = async (
       const resolvedValue = await resolveAliasToRawValue(
         aliasedVariable,
         targetModeId,
-        collectionName
+        collectionName,
+        modeName
       );
       if (resolvedValue) {
         console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
@@ -173,7 +179,8 @@ const convertStringValue = async (
 export const generateCSSValue = async (
   variable: Variable,
   modeId?: string,
-  collectionName: string = ""
+  collectionName: string = "",
+  modeName?: string
 ): Promise<string> => {
   try {
     if (!variable) {
@@ -202,7 +209,7 @@ export const generateCSSValue = async (
       return "";
     }
 
-    return await converter(variable, modeId, collectionName);
+    return await converter(variable, modeId, collectionName, modeName);
   } catch (error) {
     console.error(
       `❌ Error generating CSS value for variable ${variable?.name}:`,

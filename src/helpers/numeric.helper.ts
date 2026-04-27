@@ -5,10 +5,10 @@
 import { BASE_FONT_SIZE } from "../constants/conversion.constants";
 
 /**
- * Converts pixel values to rem units
+ * Converts pixel values to rem units with up to two decimal places
  */
 export const pxToRem = (px: number): string => {
-  const rem = px / BASE_FONT_SIZE;
+  const rem = roundToDecimals(px / BASE_FONT_SIZE, 2);
   return `${rem}rem`;
 };
 

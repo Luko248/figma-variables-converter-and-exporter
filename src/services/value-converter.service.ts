@@ -152,28 +152,67 @@ export const safeStringConversion = (
 };
 
 /**
- * Resolves a variable alias to its raw value
+ * Resolves a variable alias to its raw value.
+ *
+ * modeId is from the *source* variable's collection. When the alias points at
+ * a variable in a different collection, those collection-local mode IDs don't
+ * match — so we re-map by mode name (falling back to the aliased variable's
+ * first available mode when no name matches, e.g. single-mode primitives).
  */
 export async function resolveAliasToRawValue(
   aliasedVariable: Variable,
   modeId: string,
-  collectionName: string
+  collectionName: string,
+  modeName?: string
 ): Promise<string | null> {
   try {
     const valuesByMode = aliasedVariable.valuesByMode;
-    if (!valuesByMode || !valuesByMode[modeId]) {
-      console.warn(`⚠️ No value found for mode ${modeId} in alias ${aliasedVariable.name}`);
+    if (!valuesByMode || Object.keys(valuesByMode).length === 0) {
+      console.warn(`⚠️ No modes available in alias ${aliasedVariable.name}`);
       return null;
     }
 
-    const rawValue = valuesByMode[modeId];
+    let resolvedModeId = modeId;
+    let rawValue = valuesByMode[resolvedModeId];
+
+    if (rawValue === undefined && modeName && aliasedVariable.variableCollectionId) {
+      const aliasedCollection =
+        await figma.variables.getVariableCollectionByIdAsync(
+          aliasedVariable.variableCollectionId
+        );
+      const match = aliasedCollection?.modes.find((m) => m.name === modeName);
+      if (match) {
+        resolvedModeId = match.modeId;
+        rawValue = valuesByMode[resolvedModeId];
+      }
+    }
+
+    if (rawValue === undefined) {
+      const firstModeId = Object.keys(valuesByMode)[0];
+      if (firstModeId) {
+        resolvedModeId = firstModeId;
+        rawValue = valuesByMode[firstModeId];
+      }
+    }
+
+    if (rawValue === undefined) {
+      console.warn(
+        `⚠️ No value found for mode ${modeId} (name: ${modeName ?? "-"}) in alias ${aliasedVariable.name}`
+      );
+      return null;
+    }
 
     // If the aliased variable is itself an alias, recursively resolve it
     if (typeof rawValue === 'object' && rawValue !== null && 'type' in rawValue && (rawValue as VariableAlias).type === 'VARIABLE_ALIAS') {
       const nestedAliasId = (rawValue as VariableAlias).id;
       const nestedVariable = await figma.variables.getVariableByIdAsync(nestedAliasId);
       if (nestedVariable) {
-        return await resolveAliasToRawValue(nestedVariable, modeId, collectionName);
+        return await resolveAliasToRawValue(
+          nestedVariable,
+          resolvedModeId,
+          collectionName,
+          modeName
+        );
       }
       return null;
     }
