@@ -33,11 +33,19 @@ export interface ThemeCssOutput {
 }
 
 /** Supported export formats */
-export type ExportFormat = "css-variables" | "tailwind-theme";
+export type ExportFormat = "css-variables" | "tailwind-theme" | "scss";
+
+/** Supported token naming conventions */
+export type TokenNamingConvention = "camel-case" | "kebab-case";
 
 /** Options that affect exported file content */
 export interface ExportOptions {
   format: ExportFormat;
+}
+
+/** Options that affect variable conversion */
+export interface ConversionOptions {
+  namingConvention: TokenNamingConvention;
 }
 
 /** Variable type categories */

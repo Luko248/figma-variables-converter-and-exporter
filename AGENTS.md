@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI agents when working with code in this repository.
 
 ## Project Overview
 
-A Figma plugin that converts Figma design variables into CSS custom properties and exports them to GitHub. The plugin updates Figma Dev Mode to display variables as `var(--variableName)` syntax and generates organized CSS files with multi-theme support.
+A Figma plugin that converts Figma design variables into CSS custom properties and exports them to GitHub. The plugin updates Figma Dev Mode to d/isplay variables as `var(--variableName)` syntax and generates organized CSS files with multi-theme support.
 
 ## Development Commands
 
@@ -30,7 +30,6 @@ npm run clean
 The build process has two steps:
 
 1. **Main build** (esbuild): Bundles TypeScript into a single `code.js` file using:
-
    - Entry: `src/main.ts`
    - Target: ES2017 (Figma runtime compatibility)
    - Format: IIFE (Immediately Invoked Function Expression)

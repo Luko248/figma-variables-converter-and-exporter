@@ -14,6 +14,8 @@ export type {
   ThemeCssOutput,
   ExportFormat,
   ExportOptions,
+  ConversionOptions,
+  TokenNamingConvention,
   VariableCategory,
 } from "./variable.types";
 

@@ -4,7 +4,11 @@
  */
 
 import "./types/figma.types";
-import { ConversionResult, ExportOptions } from "./types/index";
+import {
+  ConversionOptions,
+  ConversionResult,
+  ExportOptions,
+} from "./types/index";
 import { convertVariablesToCSS } from "./services/variable-conversion.service";
 import { exportToGitHub } from "./services/export.service";
 import { GITHUB_CONFIG } from "./config";
@@ -136,7 +140,9 @@ async function loadVariables(collectionId: string): Promise<{
 /**
  * Wrapper for conversion with execution control
  */
-async function handleConvertVariables(): Promise<ConversionResult> {
+async function handleConvertVariables(
+  options: ConversionOptions = { namingConvention: "camel-case" }
+): Promise<ConversionResult> {
   if (isRunning) {
     console.log("⚠️ Plugin already running, ignoring duplicate call");
     throw new Error("Plugin already running");
@@ -145,7 +151,7 @@ async function handleConvertVariables(): Promise<ConversionResult> {
   isRunning = true;
 
   try {
-    const result = await convertVariablesToCSS();
+    const result = await convertVariablesToCSS(options);
     lastConversionResult = result;
     return result;
   } finally {
@@ -225,6 +231,7 @@ async function main() {
         path?: string;
         token?: string;
       };
+      conversionOptions?: ConversionOptions;
       exportOptions?: ExportOptions;
     };
 
@@ -345,7 +352,9 @@ async function main() {
         // Converter
         case "convert-variables":
           try {
-            const result = await handleConvertVariables();
+            const result = await handleConvertVariables(
+              message.conversionOptions || { namingConvention: "camel-case" }
+            );
 
             console.log("📤 Sending to UI:");
             console.log("   variablesCount:", result.variables.length);

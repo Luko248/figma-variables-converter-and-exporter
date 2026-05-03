@@ -3,7 +3,13 @@
  */
 
 import "../types/figma.types";
-import { ConversionResult, ProcessedVariable, VariablesByTheme, CSSVariable } from "../types/index";
+import {
+  ConversionOptions,
+  ConversionResult,
+  ProcessedVariable,
+  VariablesByTheme,
+  CSSVariable,
+} from "../types/index";
 import { generateCSSValue } from "./css-value-generator.service";
 import { generateCSSVariableName } from "./variable-naming.service";
 import { detectVariableType } from "./variable-type-detector.service";
@@ -24,7 +30,8 @@ async function processBatchOfVariables(
   variableIds: string[],
   collection: VariableCollection,
   allModes: Record<string, string>,
-  variablesByTheme: VariablesByTheme
+  variablesByTheme: VariablesByTheme,
+  options: ConversionOptions
 ): Promise<void> {
   const promises = variableIds.map(async (variableId) => {
     try {
@@ -40,7 +47,13 @@ async function processBatchOfVariables(
       const cssVariableName = getCachedCSSVariableName(
         collection.name,
         variable.name,
-        generateCSSVariableName
+        (collectionName, currentVariableName) =>
+          generateCSSVariableName(
+            collectionName,
+            currentVariableName,
+            options.namingConvention
+          ),
+        options.namingConvention
       );
 
       // Process variable for each theme/mode
@@ -121,7 +134,9 @@ async function updateFigmaSyntax(variables: ProcessedVariable[]): Promise<void> 
 /**
  * Converts Figma variables to CSS format
  */
-export async function convertVariablesToCSS(): Promise<ConversionResult> {
+export async function convertVariablesToCSS(
+  options: ConversionOptions = { namingConvention: "camel-case" }
+): Promise<ConversionResult> {
   try {
     // Check if variables API is available
     if (!figma.variables || !figma.variables.getLocalVariableCollectionsAsync) {
@@ -192,7 +207,8 @@ export async function convertVariablesToCSS(): Promise<ConversionResult> {
           batch,
           collection,
           allModes,
-          variablesByTheme
+          variablesByTheme,
+          options
         );
 
         totalProcessed += batch.length;

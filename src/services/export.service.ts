@@ -5,6 +5,7 @@
 import { ConversionResult, ExportOptions } from "../types/index";
 import {
   buildCssOutput,
+  buildScssOutput,
   buildTailwindThemeOutput,
   buildThemeAwareCssOutput,
 } from "./css-builder.service";
@@ -35,8 +36,17 @@ export async function exportToGitHub(
   try {
     assertGitHubConfig();
     const isTailwindTheme = options.format === "tailwind-theme";
-    const fileName = isTailwindTheme ? "theme.css" : "variables.css";
-    const formatLabel = isTailwindTheme ? "Tailwind theme" : "CSS variables";
+    const isScss = options.format === "scss";
+    const fileName = isTailwindTheme
+      ? "theme.css"
+      : isScss
+        ? "variables.scss"
+        : "variables.css";
+    const formatLabel = isTailwindTheme
+      ? "Tailwind theme"
+      : isScss
+        ? "SCSS variables"
+        : "CSS variables";
 
     console.log("🚀 Starting GitHub export...");
     console.log("   export format:", options.format);
@@ -88,7 +98,9 @@ export async function exportToGitHub(
       console.log("⚠️ FALLING BACK TO SINGLE THEME MODE!");
       const cssOutput = isTailwindTheme
         ? buildTailwindThemeOutput(data.variables)
-        : buildCssOutput(data.variables);
+        : isScss
+          ? buildScssOutput(data.variables)
+          : buildCssOutput(data.variables);
       const githubResult = await pushCssThemesToGitHub(
         { theme: cssOutput },
         { fileName, formatLabel }

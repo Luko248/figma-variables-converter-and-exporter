@@ -7,7 +7,8 @@ import { CSSVariable, ThemeCssOutput, VariableCategory } from "../types/index";
 import { toKebabCase } from "../helpers/string.helper";
 
 type GroupedVariables = Record<VariableCategory, Array<{ name: string; value: string }>>;
-type CssOutputFormat = "css-variables" | "tailwind-theme";
+type GroupedVariablesScss = Record<VariableCategory, Array<{ name: string; scssName: string; value: string }>>;
+type CssOutputFormat = "css-variables" | "tailwind-theme" | "scss";
 
 const SECTION_LABELS: Record<VariableCategory, string> = {
   color: "Colors",
@@ -199,6 +200,58 @@ const groupTailwindVariablesByType = (
   return grouped;
 };
 
+const toScssVariableName = (name: string): string => {
+  const normalized = name
+    .replace(/^--/, "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `$${normalized}`;
+};
+
+const groupScssVariablesByType = (
+  variables: CSSVariable[]
+): GroupedVariablesScss => {
+  const grouped: GroupedVariablesScss = {
+    color: [],
+    fonts: [],
+    measures: [],
+  };
+
+  variables.forEach((variable) => {
+    const bucket =
+      grouped[variable.type as VariableCategory] || grouped.measures;
+    bucket.push({
+      name: variable.name,
+      scssName: toScssVariableName(variable.name),
+      value: variable.value,
+    });
+  });
+
+  return grouped;
+};
+
+const formatScssSection = (
+  type: VariableCategory,
+  variables: Array<{ scssName: string; value: string }>
+): string => {
+  if (!variables.length) {
+    return `/* ${SECTION_LABELS[type]} */`;
+  }
+
+  const lines = variables
+    .slice()
+    .sort((a, b) => a.scssName.localeCompare(b.scssName))
+    .map((variable) => `${variable.scssName}: ${variable.value};`)
+    .join("\n");
+
+  return [`/* ${SECTION_LABELS[type]} */`, lines].join("\n");
+};
+
 /**
  * Builds a CSS string with :root containing grouped variables.
  */
@@ -247,6 +300,28 @@ export const buildTailwindThemeOutput = (
 };
 
 /**
+ * Builds an SCSS variables file.
+ */
+export const buildScssOutput = (cssVariables: CSSVariable[] = []): string => {
+  const grouped = groupScssVariablesByType(cssVariables);
+  const exportTimestamp = new Date().toISOString();
+
+  const sections = GROUP_ORDER.map((type) =>
+    formatScssSection(type, grouped[type])
+  );
+
+  return [
+    "/*",
+    " * Design tokens exported from Figma",
+    ` * Exported at: ${exportTimestamp}`,
+    " * Format: SCSS variables grouped by kind",
+    " */",
+    sections.join("\n\n"),
+    "",
+  ].join("\n");
+};
+
+/**
  * Builds theme-aware CSS output with sanitized theme names as keys.
  */
 export const buildThemeAwareCssOutput = (
@@ -269,7 +344,9 @@ export const buildThemeAwareCssOutput = (
     result[themeName] =
       format === "tailwind-theme"
         ? buildTailwindThemeOutput(variables)
-        : buildCssOutput(variables);
+        : format === "scss"
+          ? buildScssOutput(variables)
+          : buildCssOutput(variables);
   });
 
   return result;

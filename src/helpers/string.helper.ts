@@ -35,6 +35,25 @@ export const cleanVariableName = (name: string): string => {
 };
 
 /**
+ * Converts a Figma variable name to kebab-case while preserving numbers.
+ */
+export const cleanVariableNameToKebabCase = (name: string): string => {
+  return name
+    .split(/[/\-_\s]+/)
+    .filter((part) => part.length > 0)
+    .map((part) =>
+      part
+        .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+        .toLowerCase()
+    )
+    .join("-")
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+/**
  * Converts theme name to kebab-case
  * Example: "Koop Dark" → "koop-dark"
  */

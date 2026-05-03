@@ -17,9 +17,10 @@ const variablePool: ProcessedVariable[] = [];
 export const getCachedCSSVariableName = (
   collectionName: string,
   variableName: string,
-  generator: (collectionName: string, variableName: string) => string
+  generator: (collectionName: string, variableName: string) => string,
+  cacheSuffix = ""
 ): string => {
-  const cacheKey = `${collectionName}:${variableName}`;
+  const cacheKey = `${collectionName}:${variableName}:${cacheSuffix}`;
 
   if (cssNameCache.has(cacheKey)) {
     return cssNameCache.get(cacheKey)!;

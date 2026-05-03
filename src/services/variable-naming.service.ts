@@ -2,7 +2,11 @@
  * Variable naming service
  */
 
-import { cleanVariableName } from "../helpers/string.helper";
+import {
+  cleanVariableName,
+  cleanVariableNameToKebabCase,
+} from "../helpers/string.helper";
+import { TokenNamingConvention } from "../types/index";
 
 /**
  * Generates a CSS custom property name from a Figma variable
@@ -11,8 +15,13 @@ import { cleanVariableName } from "../helpers/string.helper";
  */
 export const generateCSSVariableName = (
   _collectionName: string,
-  variableName: string
+  variableName: string,
+  namingConvention: TokenNamingConvention = "camel-case"
 ): string => {
+  if (namingConvention === "kebab-case") {
+    return `--${cleanVariableNameToKebabCase(variableName)}`;
+  }
+
   let cleanVariable = cleanVariableName(variableName);
 
   // Convert first character to lowercase for camelCase

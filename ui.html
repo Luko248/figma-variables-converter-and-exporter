@@ -520,6 +520,86 @@
             color: var(--muted);
         }
 
+        .naming-control {
+            display: grid;
+            gap: 10px;
+        }
+
+        .naming-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .naming-tab {
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel-strong);
+            color: var(--text);
+            cursor: pointer;
+            padding: 12px;
+            text-align: left;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .naming-tab:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .naming-tab.active {
+            border-color: var(--accent);
+            background: var(--bg);
+            box-shadow: 0 2px 8px rgba(45, 157, 106, 0.18);
+        }
+
+        .naming-tab-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .naming-tab-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .naming-tab-badge {
+            border-radius: 999px;
+            background: var(--info-bg);
+            color: var(--info-text);
+            border: 1px solid var(--info-border);
+            font-size: 9px;
+            line-height: 1;
+            padding: 4px 6px;
+            white-space: nowrap;
+        }
+
+        .naming-tab-hint {
+            font-size: 10px;
+            color: var(--muted);
+            display: block;
+        }
+
+        .naming-tab-code {
+            display: block;
+            margin-top: 8px;
+            padding: 7px 8px;
+            border-radius: 6px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            font-size: 10px;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .switch {
             position: relative;
             display: inline-flex;
@@ -806,7 +886,44 @@
                     Convert Variables
                 </h2>
                 <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
-                    Converts Figma variables to CSS custom properties. In Dev Mode CSS tab, you'll see <code style="background: var(--panel); padding: 2px 4px; border-radius: 3px;">var(--variableName)</code> instead of raw Figma values.
+                    Choose how token names should be written before conversion. In Dev Mode CSS tab, you'll see converted syntax such as <code style="background: var(--panel); padding: 2px 4px; border-radius: 3px;">var(--buttonPrimaryBackground)</code> instead of raw Figma values.
+                </p>
+                <div class="naming-control" role="radiogroup" aria-label="Token naming convention">
+                    <div class="naming-tabs">
+                        <button
+                            id="naming-camel"
+                            class="naming-tab active"
+                            type="button"
+                            role="radio"
+                            aria-checked="true"
+                            data-naming-convention="camel-case"
+                        >
+                            <span class="naming-tab-title-row">
+                                <span class="naming-tab-title">camelCase</span>
+                                <span class="naming-tab-badge">Default</span>
+                            </span>
+                            <span class="naming-tab-hint">JS-style token names.</span>
+                            <code class="naming-tab-code">--colorBtnPrimary</code>
+                        </button>
+
+                        <button
+                            id="naming-kebab"
+                            class="naming-tab"
+                            type="button"
+                            role="radio"
+                            aria-checked="false"
+                            data-naming-convention="kebab-case"
+                        >
+                            <span class="naming-tab-title-row">
+                                <span class="naming-tab-title">kebab-case</span>
+                            </span>
+                            <span class="naming-tab-hint">CSS-style token names.</span>
+                            <code class="naming-tab-code">--color-btn-primary</code>
+                        </button>
+                    </div>
+                </div>
+                <p style="font-size: 10px; color: var(--muted); margin-top: 12px;">
+                    This setting affects both the Dev Mode variable syntax and the exported token names.
                 </p>
                 <div id="variables-count" class="variables-count hidden"></div>
             </div>
@@ -819,21 +936,22 @@
                     <svg class="icon-svg" style="vertical-align: middle; margin-right: 6px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" fill="currentColor"/>
                     </svg>
-                    Tailwind Theme
+                    Export Format
                 </h2>
                 <p style="font-size: 11px; color: #8c8c8c; margin-bottom: 12px;">
-                    Export as a Tailwind v4 <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">@theme</code> block in <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">theme.css</code> instead of plain CSS custom properties.
+                    Choose how converted tokens should be written when exported to GitHub.
                 </p>
 
-                <div class="switch-row">
-                    <div class="switch-copy">
-                        <label class="switch-label" for="tailwind-theme-toggle">Export as Tailwind theme</label>
-                        <span class="switch-hint">Writes Tailwind v4 @theme tokens to theme.css</span>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="export-format-select">Output format</label>
+                    <select id="export-format-select" class="form-select">
+                        <option value="css-variables" selected>CSS</option>
+                        <option value="tailwind-theme">Tailwind theme</option>
+                        <option value="scss">SCSS</option>
+                    </select>
+                    <div id="export-format-help" class="info-message" style="margin-top: 10px;">
+                        Exports plain CSS custom properties to <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">variables.css</code>.
                     </div>
-                    <label class="switch" aria-label="Export as Tailwind theme">
-                        <input id="tailwind-theme-toggle" type="checkbox" />
-                        <span class="switch-slider"></span>
-                    </label>
                 </div>
             </div>
 
@@ -960,11 +1078,14 @@
         const ghTokenInput = document.getElementById('gh-token');
         const saveConfigBtn = document.getElementById('save-config-btn');
         const configStatus = document.getElementById('config-status');
-        const tailwindThemeToggle = document.getElementById('tailwind-theme-toggle');
+        const exportFormatSelect = document.getElementById('export-format-select');
+        const exportFormatHelp = document.getElementById('export-format-help');
+        const namingConventionButtons = document.querySelectorAll('.naming-tab');
         
         // Theme management
         const THEME_STORAGE_KEY = 'figma-tokens-theme';
         const GITHUB_STORAGE_KEY = 'figma-tokens-github-config';
+        const TOKEN_NAMING_STORAGE_KEY = 'figma-tokens-naming-convention';
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
         let savedTheme = null;
         let githubConfig = null;
@@ -1039,6 +1160,8 @@
         // GitHub config will be loaded from plugin storage when it sends 'load-saved-config' message
         // localStorage is kept as a backup but plugin storage is the source of truth
         githubConfig = loadStoredGithubConfig();
+        applyStoredNamingConvention();
+        updateExportFormatHelp();
         if (githubConfig) {
           applyGithubConfigToInputs(githubConfig);
           // Don't send to plugin here - let plugin send its stored config first
@@ -1112,6 +1235,7 @@
         let selectedCollection = null;
         let variables = [];
         let convertedVariables = null;
+        let lastConversionOptions = { namingConvention: getSelectedNamingConvention() };
         let editorType = 'figma'; // Default to figma editor
 
         // Utility Functions
@@ -1137,9 +1261,12 @@
         }
 
         function resetButtonContent(button) {
-            const exportLabel = tailwindThemeToggle && tailwindThemeToggle.checked
+            const exportFormat = exportFormatSelect ? exportFormatSelect.value : 'css-variables';
+            const exportLabel = exportFormat === 'tailwind-theme'
                 ? 'Export Tailwind Theme to GitHub'
-                : 'Export CSS to GitHub';
+                : exportFormat === 'scss'
+                    ? 'Export SCSS to GitHub'
+                    : 'Export CSS to GitHub';
             const buttonConfigs = {
                 'convert-btn': '<svg class="icon-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M15.56.93a.34.34 0 00-.37.07l-1.41 1.42A8.07 8.07 0 008.06 0a8.1 8.1 0 00-7.73 5.88.34.34 0 00.33.43h2.17a.34.34 0 00.32-.22 5.46 5.46 0 014.02-3.38c.3-.05.6-.08.9-.08a5.44 5.44 0 013.78 1.62l-1.44 1.44a.34.34 0 00.24.58h4.8a.34.34 0 00.34-.34V1.12a.34.34 0 00-.21-.31zM15.34 9.58h-2.17a.34.34 0 00-.32.22 5.46 5.46 0 01-4.02 3.38c-.3.05-.6.08-.9.08a5.44 5.44 0 01-3.78-1.62l1.44-1.44a.34.34 0 00-.24-.58H.55a.34.34 0 00-.34.34v4.8c0 .14.08.26.21.31a.34.34 0 00.37-.07l1.42-1.42A8.07 8.07 0 008.06 16a8.1 8.1 0 007.73-5.88.34.34 0 00-.33-.42z" fill="currentColor"/></svg> Convert Variables to Dev Format',
                 'export-btn': `<svg class="icon-svg" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1V10M8 10L11 7M8 10L5 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 10V14C14 14.5523 13.5523 15 13 15H3C2.44772 15 2 14.5523 2 14V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ${exportLabel}`
@@ -1147,10 +1274,69 @@
             button.innerHTML = buttonConfigs[button.id] || button.innerHTML;
         }
 
-        tailwindThemeToggle.addEventListener('change', () => {
-            if (!exportBtn.disabled) {
-                resetButtonContent(exportBtn);
+        function getSelectedNamingConvention() {
+            const selected = document.querySelector('.naming-tab.active');
+            return selected ? selected.dataset.namingConvention : 'camel-case';
+        }
+
+        function setNamingConvention(value) {
+            const nextValue = value === 'kebab-case' ? 'kebab-case' : 'camel-case';
+
+            namingConventionButtons.forEach(button => {
+                const isActive = button.dataset.namingConvention === nextValue;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-checked', isActive ? 'true' : 'false');
+            });
+
+        }
+
+        function applyStoredNamingConvention() {
+            let namingConvention = 'camel-case';
+
+            try {
+                namingConvention = localStorage.getItem(TOKEN_NAMING_STORAGE_KEY) || 'camel-case';
+            } catch (e) {
+                namingConvention = 'camel-case';
             }
+
+            setNamingConvention(namingConvention);
+        }
+
+        function persistNamingConvention(value) {
+            try {
+                localStorage.setItem(TOKEN_NAMING_STORAGE_KEY, value);
+            } catch (e) {
+                // ignore storage errors
+            }
+        }
+
+        function updateExportFormatHelp() {
+            const format = exportFormatSelect.value;
+
+            if (format === 'tailwind-theme') {
+                exportFormatHelp.innerHTML = 'Exports Tailwind v4 <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">@theme</code> variables to <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">theme.css</code>.';
+                return;
+            }
+
+            if (format === 'scss') {
+                exportFormatHelp.innerHTML = 'Exports SCSS variables to <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">variables.scss</code>.';
+                return;
+            }
+
+            exportFormatHelp.innerHTML = 'Exports plain CSS custom properties to <code style="background: var(--panel-strong); padding: 2px 4px; border-radius: 3px;">variables.css</code>.';
+        }
+
+        namingConventionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const namingConvention = button.dataset.namingConvention || 'camel-case';
+                setNamingConvention(namingConvention);
+                persistNamingConvention(namingConvention);
+            });
+        });
+
+        exportFormatSelect.addEventListener('change', () => {
+            updateExportFormatHelp();
+            resetButtonContent(exportBtn);
         });
 
         // Tab Management
@@ -1303,9 +1489,14 @@
             variablesCount.classList.add('hidden');
 
             try {
+                const namingConvention = getSelectedNamingConvention();
+                lastConversionOptions = { namingConvention };
+                persistNamingConvention(namingConvention);
+
                 parent.postMessage({ 
                     pluginMessage: { 
-                        type: 'convert-variables' 
+                        type: 'convert-variables',
+                        conversionOptions: lastConversionOptions
                     } 
                 }, '*');
             } catch (error) {
@@ -1334,7 +1525,7 @@
 
             try {
                 const exportOptions = {
-                    format: tailwindThemeToggle.checked ? 'tailwind-theme' : 'css-variables'
+                    format: exportFormatSelect.value
                 };
 
                 parent.postMessage({ 
@@ -1439,7 +1630,7 @@
                 case 'convert-success':
                     convertedVariables = data.variables;
                     showStatus(`✅ Converted ${data.count} variables successfully`, 'success');
-                    variablesCount.textContent = `${data.count} variables ready for export`;
+                    variablesCount.textContent = `${data.count} variables ready for export using ${lastConversionOptions.namingConvention === 'kebab-case' ? 'kebab-case' : 'camelCase'} naming`;
                     variablesCount.classList.remove('hidden');
                     exportBtn.disabled = false;
                     exportBtn.classList.remove('button-secondary');
