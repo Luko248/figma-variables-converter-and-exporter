@@ -6,8 +6,14 @@
 import { CSSVariable, ThemeCssOutput, VariableCategory } from "../types/index";
 import { toKebabCase } from "../helpers/string.helper";
 
-type GroupedVariables = Record<VariableCategory, Array<{ name: string; value: string }>>;
-type GroupedVariablesScss = Record<VariableCategory, Array<{ name: string; scssName: string; value: string }>>;
+type GroupedVariables = Record<
+  VariableCategory,
+  Array<{ name: string; value: string }>
+>;
+type GroupedVariablesScss = Record<
+  VariableCategory,
+  Array<{ name: string; scssName: string; value: string }>
+>;
 type CssOutputFormat = "css-variables" | "tailwind-theme" | "scss";
 
 const SECTION_LABELS: Record<VariableCategory, string> = {
@@ -39,7 +45,7 @@ const groupVariablesByType = (variables: CSSVariable[]): GroupedVariables => {
 
 const formatSection = (
   type: VariableCategory,
-  variables: Array<{ name: string; value: string }>
+  variables: Array<{ name: string; value: string }>,
 ): string => {
   if (!variables.length) {
     return `  /* ${SECTION_LABELS[type]} */`;
@@ -128,7 +134,11 @@ const toTailwindThemeVariableName = (variable: CSSVariable): string => {
     return `--font-${stripLeadingTokens(segment, ["font-family", "font"])}`;
   }
 
-  if (segment.includes("radius") || segment.includes("rounded") || segment.includes("corner")) {
+  if (
+    segment.includes("radius") ||
+    segment.includes("rounded") ||
+    segment.includes("corner")
+  ) {
     return `--radius-${stripLeadingTokens(segment, [
       "border-radius",
       "radius",
@@ -180,7 +190,7 @@ const toTailwindThemeVariableName = (variable: CSSVariable): string => {
 };
 
 const groupTailwindVariablesByType = (
-  variables: CSSVariable[]
+  variables: CSSVariable[],
 ): GroupedVariables => {
   const grouped: GroupedVariables = {
     color: [],
@@ -214,7 +224,7 @@ const toScssVariableName = (name: string): string => {
 };
 
 const groupScssVariablesByType = (
-  variables: CSSVariable[]
+  variables: CSSVariable[],
 ): GroupedVariablesScss => {
   const grouped: GroupedVariablesScss = {
     color: [],
@@ -237,7 +247,7 @@ const groupScssVariablesByType = (
 
 const formatScssSection = (
   type: VariableCategory,
-  variables: Array<{ scssName: string; value: string }>
+  variables: Array<{ scssName: string; value: string }>,
 ): string => {
   if (!variables.length) {
     return `/* ${SECTION_LABELS[type]} */`;
@@ -259,7 +269,9 @@ export const buildCssOutput = (cssVariables: CSSVariable[] = []): string => {
   const grouped = groupVariablesByType(cssVariables);
   const exportTimestamp = new Date().toISOString();
 
-  const sections = GROUP_ORDER.map((type) => formatSection(type, grouped[type]));
+  const sections = GROUP_ORDER.map((type) =>
+    formatSection(type, grouped[type]),
+  );
 
   return [
     "/*",
@@ -278,21 +290,24 @@ export const buildCssOutput = (cssVariables: CSSVariable[] = []): string => {
  * Builds a Tailwind CSS v4 theme file.
  */
 export const buildTailwindThemeOutput = (
-  cssVariables: CSSVariable[] = []
+  cssVariables: CSSVariable[] = [],
 ): string => {
   const grouped = groupTailwindVariablesByType(cssVariables);
   const exportTimestamp = new Date().toISOString();
 
-  const sections = GROUP_ORDER.map((type) => formatSection(type, grouped[type]));
+  const sections = GROUP_ORDER.map((type) =>
+    formatSection(type, grouped[type]),
+  );
 
   return [
     "/*",
     " * Design tokens exported from Figma",
     ` * Exported at: ${exportTimestamp}`,
     " * Format: Tailwind CSS v4 @theme variables",
-    " * Usage: import this file after @import \"tailwindcss\";",
     " */",
-    "@theme static {",
+    '@import "tailwindcss";',
+    "",
+    "@theme {",
     sections.join("\n"),
     "}",
     "",
@@ -307,7 +322,7 @@ export const buildScssOutput = (cssVariables: CSSVariable[] = []): string => {
   const exportTimestamp = new Date().toISOString();
 
   const sections = GROUP_ORDER.map((type) =>
-    formatScssSection(type, grouped[type])
+    formatScssSection(type, grouped[type]),
   );
 
   return [
@@ -326,14 +341,13 @@ export const buildScssOutput = (cssVariables: CSSVariable[] = []): string => {
  */
 export const buildThemeAwareCssOutput = (
   variablesByTheme: Record<string, CSSVariable[]>,
-  format: CssOutputFormat = "css-variables"
+  format: CssOutputFormat = "css-variables",
 ): ThemeCssOutput => {
   const themes = Object.keys(variablesByTheme);
   const result: ThemeCssOutput = {};
 
   themes.forEach((theme) => {
-    let themeName =
-      themes.length === 1 ? "theme" : toKebabCase(theme);
+    let themeName = themes.length === 1 ? "theme" : toKebabCase(theme);
 
     // Remove light suffix to keep primary theme clean (dark stays with suffix)
     if (themeName.endsWith("-light")) {
