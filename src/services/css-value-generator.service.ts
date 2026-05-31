@@ -7,32 +7,55 @@ import {
   safeColorConversion,
   safeFloatConversion,
   safeStringConversion,
+  resolveAliasToRawValue,
 } from "./value-converter.service";
 import { generateCSSVariableName } from "./variable-naming.service";
 import { FALLBACK_OKLCH_COLOR } from "../constants/conversion.constants";
 import { TokenNamingConvention } from "../types/index";
 
 /**
- * Emits `var(--<alias-target-name>)` so the exported CSS preserves the
- * inheritance chain from the Figma source (Core → Semantic → Component)
- * instead of flattening every alias to the resolved leaf value.
- *
- * Uses the same `generateCSSVariableName` that the orchestrator uses to
- * emit declarations, so the reference and the declaration always agree
- * on naming. Returns `null` only when the alias target is missing — the
- * caller falls back to raw value resolution in that case so we never
- * emit a dangling `var(--…)`.
+ * Walk the alias chain forward until we hit a variable that will actually
+ * be emitted in the export (i.e. its id is in `exportedIds`), and return
+ * `var(--<its-name>)`. If we exhaust the chain without finding an
+ * exported target — typical for "orphan" Figma variables that exist by
+ * id but aren't members of any collection's `variableIds` — return
+ * `null` so the caller falls back to raw value resolution. This keeps
+ * inheritance intact when possible without emitting dangling references.
  */
-const generateAliasReference = (
+const generateAliasReference = async (
   aliasedVariable: Variable,
-  namingConvention: TokenNamingConvention
-): string => {
-  const cssName = generateCSSVariableName(
-    "",
-    aliasedVariable.name,
-    namingConvention
-  );
-  return `var(${cssName})`;
+  namingConvention: TokenNamingConvention,
+  exportedIds: Set<string>
+): Promise<string | null> => {
+  let cur: Variable | null = aliasedVariable;
+  // Cap to a small depth so a cycle (shouldn't happen in Figma, but defend
+  // against it) can't hang the exporter.
+  for (let depth = 0; depth < 16 && cur; depth += 1) {
+    if (exportedIds.has(cur.id)) {
+      const cssName = generateCSSVariableName(
+        "",
+        cur.name,
+        namingConvention
+      );
+      return `var(${cssName})`;
+    }
+    // Cur is an orphan — try to follow ITS alias to a deeper target.
+    const valuesByMode = cur.valuesByMode || {};
+    const firstModeId = Object.keys(valuesByMode)[0];
+    if (!firstModeId) return null;
+    const inner = valuesByMode[firstModeId];
+    if (
+      !inner ||
+      typeof inner !== "object" ||
+      !("type" in inner) ||
+      (inner as { type: string }).type !== "VARIABLE_ALIAS"
+    ) {
+      return null;
+    }
+    const nextId = (inner as VariableAlias).id;
+    cur = await figma.variables.getVariableByIdAsync(nextId);
+  }
+  return null;
 };
 
 /**
@@ -43,7 +66,8 @@ const convertColorValue = async (
   modeId: string | undefined,
   collectionName: string,
   modeName: string | undefined,
-  namingConvention: TokenNamingConvention
+  namingConvention: TokenNamingConvention,
+  exportedIds: Set<string>
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -64,13 +88,31 @@ const convertColorValue = async (
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const ref = generateAliasReference(aliasedVariable, namingConvention);
-      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
-      return ref;
+      const ref = await generateAliasReference(
+        aliasedVariable,
+        namingConvention,
+        exportedIds
+      );
+      if (ref) {
+        console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+        return ref;
+      }
+      // Chain led only through orphan variables (no exported target).
+      // Fall back to recursive raw resolution so we still produce a
+      // valid value instead of a dangling reference.
+      const resolved = await resolveAliasToRawValue(
+        aliasedVariable,
+        targetModeId,
+        collectionName,
+        modeName
+      );
+      if (resolved) {
+        console.warn(
+          `⚠️ Orphan alias chain for ${variable.name} — inlined raw value`
+        );
+        return resolved;
+      }
     }
-    // Alias target missing in the file. Don't emit `var(--…)` to a
-    // dangling name; use the fallback color so the declaration is
-    // still parseable and visually identifiable as broken.
     console.error(
       `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
     );
@@ -97,7 +139,8 @@ const convertFloatValue = async (
   modeId: string | undefined,
   collectionName: string,
   modeName: string | undefined,
-  namingConvention: TokenNamingConvention
+  namingConvention: TokenNamingConvention,
+  exportedIds: Set<string>
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -118,9 +161,27 @@ const convertFloatValue = async (
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const ref = generateAliasReference(aliasedVariable, namingConvention);
-      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
-      return ref;
+      const ref = await generateAliasReference(
+        aliasedVariable,
+        namingConvention,
+        exportedIds
+      );
+      if (ref) {
+        console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+        return ref;
+      }
+      const resolved = await resolveAliasToRawValue(
+        aliasedVariable,
+        targetModeId,
+        collectionName,
+        modeName
+      );
+      if (resolved) {
+        console.warn(
+          `⚠️ Orphan alias chain for ${variable.name} — inlined raw value`
+        );
+        return resolved;
+      }
     }
     console.error(
       `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
@@ -148,7 +209,8 @@ const convertStringValue = async (
   modeId: string | undefined,
   collectionName: string,
   modeName: string | undefined,
-  namingConvention: TokenNamingConvention
+  namingConvention: TokenNamingConvention,
+  exportedIds: Set<string>
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -169,9 +231,27 @@ const convertStringValue = async (
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const ref = generateAliasReference(aliasedVariable, namingConvention);
-      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
-      return ref;
+      const ref = await generateAliasReference(
+        aliasedVariable,
+        namingConvention,
+        exportedIds
+      );
+      if (ref) {
+        console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+        return ref;
+      }
+      const resolved = await resolveAliasToRawValue(
+        aliasedVariable,
+        targetModeId,
+        collectionName,
+        modeName
+      );
+      if (resolved) {
+        console.warn(
+          `⚠️ Orphan alias chain for ${variable.name} — inlined raw value`
+        );
+        return resolved;
+      }
     }
     console.error(
       `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
@@ -200,7 +280,8 @@ export const generateCSSValue = async (
   modeId?: string,
   collectionName: string = "",
   modeName?: string,
-  namingConvention: TokenNamingConvention = "camel-case"
+  namingConvention: TokenNamingConvention = "camel-case",
+  exportedIds: Set<string> = new Set()
 ): Promise<string> => {
   try {
     if (!variable) {
@@ -234,7 +315,8 @@ export const generateCSSValue = async (
       modeId,
       collectionName,
       modeName,
-      namingConvention
+      namingConvention,
+      exportedIds
     );
   } catch (error) {
     console.error(

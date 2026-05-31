@@ -31,7 +31,8 @@ async function processBatchOfVariables(
   collection: VariableCollection,
   allModes: Record<string, string>,
   variablesByTheme: VariablesByTheme,
-  options: ConversionOptions
+  options: ConversionOptions,
+  exportedIds: Set<string>
 ): Promise<void> {
   const promises = variableIds.map(async (variableId) => {
     try {
@@ -66,7 +67,8 @@ async function processBatchOfVariables(
           modeId,
           collection.name,
           modeName,
-          options.namingConvention
+          options.namingConvention,
+          exportedIds
         );
 
         if (cssValue) {
@@ -196,6 +198,18 @@ export async function convertVariablesToCSS(
       `🔄 Processing ${totalVariables} variables in batches of ${VARIABLE_BATCH_SIZE}...`
     );
 
+    // Precompute the set of variable IDs that will actually be emitted.
+    // The alias-reference path uses this to detect "orphan" alias targets
+    // (variables whose id exists but which no collection owns) and walk
+    // past them, so we never emit `var(--…)` to a name that has no
+    // corresponding declaration in the output.
+    const exportedIds = new Set<string>();
+    for (const collection of collections) {
+      for (const vid of collection.variableIds) {
+        exportedIds.add(vid);
+      }
+    }
+
     for (const collection of collections) {
       console.log(`🔍 Processing collection: ${collection.name}`);
 
@@ -209,7 +223,8 @@ export async function convertVariablesToCSS(
           collection,
           allModes,
           variablesByTheme,
-          options
+          options,
+          exportedIds
         );
 
         totalProcessed += batch.length;
