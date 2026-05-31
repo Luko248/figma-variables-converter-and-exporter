@@ -7,18 +7,43 @@ import {
   safeColorConversion,
   safeFloatConversion,
   safeStringConversion,
-  resolveAliasToRawValue,
 } from "./value-converter.service";
+import { generateCSSVariableName } from "./variable-naming.service";
 import { FALLBACK_OKLCH_COLOR } from "../constants/conversion.constants";
+import { TokenNamingConvention } from "../types/index";
+
+/**
+ * Emits `var(--<alias-target-name>)` so the exported CSS preserves the
+ * inheritance chain from the Figma source (Core → Semantic → Component)
+ * instead of flattening every alias to the resolved leaf value.
+ *
+ * Uses the same `generateCSSVariableName` that the orchestrator uses to
+ * emit declarations, so the reference and the declaration always agree
+ * on naming. Returns `null` only when the alias target is missing — the
+ * caller falls back to raw value resolution in that case so we never
+ * emit a dangling `var(--…)`.
+ */
+const generateAliasReference = (
+  aliasedVariable: Variable,
+  namingConvention: TokenNamingConvention
+): string => {
+  const cssName = generateCSSVariableName(
+    "",
+    aliasedVariable.name,
+    namingConvention
+  );
+  return `var(${cssName})`;
+};
 
 /**
  * Converts color variables to OKLCH format
  */
 const convertColorValue = async (
   variable: Variable,
-  modeId?: string,
-  collectionName: string = "",
-  modeName?: string
+  modeId: string | undefined,
+  collectionName: string,
+  modeName: string | undefined,
+  namingConvention: TokenNamingConvention
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -39,19 +64,15 @@ const convertColorValue = async (
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const resolvedValue = await resolveAliasToRawValue(
-        aliasedVariable,
-        targetModeId,
-        collectionName,
-        modeName
-      );
-      if (resolvedValue) {
-        console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
-        return resolvedValue;
-      }
+      const ref = generateAliasReference(aliasedVariable, namingConvention);
+      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+      return ref;
     }
+    // Alias target missing in the file. Don't emit `var(--…)` to a
+    // dangling name; use the fallback color so the declaration is
+    // still parseable and visually identifiable as broken.
     console.error(
-      `❌ FAILED to resolve alias for ${variable.name} (alias ID: ${aliasId})`
+      `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
     );
     return FALLBACK_OKLCH_COLOR;
   }
@@ -73,9 +94,10 @@ const convertColorValue = async (
  */
 const convertFloatValue = async (
   variable: Variable,
-  modeId?: string,
-  collectionName: string = "",
-  modeName?: string
+  modeId: string | undefined,
+  collectionName: string,
+  modeName: string | undefined,
+  namingConvention: TokenNamingConvention
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -87,23 +109,21 @@ const convertFloatValue = async (
   const rawValue = valuesByMode[targetModeId];
 
   // Check if it's an alias
-  if (typeof rawValue === "object" && rawValue !== null && "type" in rawValue) {
+  if (
+    typeof rawValue === "object" &&
+    rawValue !== null &&
+    "type" in rawValue &&
+    (rawValue as { type: string }).type === "VARIABLE_ALIAS"
+  ) {
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const resolvedValue = await resolveAliasToRawValue(
-        aliasedVariable,
-        targetModeId,
-        collectionName,
-        modeName
-      );
-      if (resolvedValue) {
-        console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
-        return resolvedValue;
-      }
+      const ref = generateAliasReference(aliasedVariable, namingConvention);
+      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+      return ref;
     }
     console.error(
-      `❌ FAILED to resolve alias for ${variable.name} (alias ID: ${aliasId})`
+      `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
     );
     return "0";
   }
@@ -125,9 +145,10 @@ const convertFloatValue = async (
  */
 const convertStringValue = async (
   variable: Variable,
-  modeId?: string,
-  collectionName: string = "",
-  modeName?: string
+  modeId: string | undefined,
+  collectionName: string,
+  modeName: string | undefined,
+  namingConvention: TokenNamingConvention
 ): Promise<string> => {
   const valuesByMode = variable.valuesByMode || {};
   if (Object.keys(valuesByMode).length === 0) {
@@ -139,23 +160,21 @@ const convertStringValue = async (
   const rawValue = valuesByMode[targetModeId];
 
   // Check if it's an alias
-  if (typeof rawValue === "object" && rawValue !== null && "type" in rawValue) {
+  if (
+    typeof rawValue === "object" &&
+    rawValue !== null &&
+    "type" in rawValue &&
+    (rawValue as { type: string }).type === "VARIABLE_ALIAS"
+  ) {
     const aliasId = (rawValue as VariableAlias).id;
     const aliasedVariable = await figma.variables.getVariableByIdAsync(aliasId);
     if (aliasedVariable) {
-      const resolvedValue = await resolveAliasToRawValue(
-        aliasedVariable,
-        targetModeId,
-        collectionName,
-        modeName
-      );
-      if (resolvedValue) {
-        console.log(`🔗 Resolved alias for ${variable.name} → ${resolvedValue}`);
-        return resolvedValue;
-      }
+      const ref = generateAliasReference(aliasedVariable, namingConvention);
+      console.log(`🔗 Alias ref for ${variable.name} → ${ref}`);
+      return ref;
     }
     console.error(
-      `❌ FAILED to resolve alias for ${variable.name} (alias ID: ${aliasId})`
+      `❌ Alias target missing for ${variable.name} (alias ID: ${aliasId})`
     );
     return '""';
   }
@@ -180,7 +199,8 @@ export const generateCSSValue = async (
   variable: Variable,
   modeId?: string,
   collectionName: string = "",
-  modeName?: string
+  modeName?: string,
+  namingConvention: TokenNamingConvention = "camel-case"
 ): Promise<string> => {
   try {
     if (!variable) {
@@ -209,7 +229,13 @@ export const generateCSSValue = async (
       return "";
     }
 
-    return await converter(variable, modeId, collectionName, modeName);
+    return await converter(
+      variable,
+      modeId,
+      collectionName,
+      modeName,
+      namingConvention
+    );
   } catch (error) {
     console.error(
       `❌ Error generating CSS value for variable ${variable?.name}:`,

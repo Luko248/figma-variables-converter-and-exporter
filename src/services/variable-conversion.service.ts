@@ -65,7 +65,8 @@ async function processBatchOfVariables(
           variable,
           modeId,
           collection.name,
-          modeName
+          modeName,
+          options.namingConvention
         );
 
         if (cssValue) {
